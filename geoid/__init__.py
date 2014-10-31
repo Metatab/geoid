@@ -11,12 +11,13 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
     'state' : (40,2,2,[]),
     'county' : (50,3,2,['state']),
     'cosub' : (60,5,3,['state','county']),
-    'place' : (160,5,4,[]),
-    'urbanarea': (160,5, 4, []),
+    'place' : (160,5,4,['state']),
+    'urbanarea': (999,5, 4, []),
     'tract' : (140,6,5,['state','county']),
-    'blockgroup' : (150,1,1,['state','county','tract']),
-    'block' : (101,4,2,['state','county','tract','blockgroup']),
+    'blockgroup' : (150,1,1,['state','county','tract']), # Appears to always be the 1000's digit of block.
+    'block' : (101,4,2,['state','county','tract']),
 }
+
 
 
 
@@ -76,6 +77,18 @@ def augment(module_name, base_class):
 
         cls.augment()
 
+def make_classes(base_class, module):
+    """Create derived classes and put them into the same module as the base class"""
+
+    for k, v in summary_levels.items():
+
+        cls = base_class.class_factory(k.capitalize())
+
+        cls.augment()
+
+        setattr(module, k.capitalize(), cls)
+
+
 
 class Geoid(object):
 
@@ -83,6 +96,10 @@ class Geoid(object):
     # elem_format = '{{{}:0>{}s}}'
     # sl_regex = '(?P<sl>.{2})'
     # elem_regex = '(?P<{}>.{{{}}})'
+
+    @classmethod
+    def resolve_summary_level(cls, sl):
+        return cls.sl_map[cls.encode.__func__(sl)][0]
 
     @classmethod
     def make_format_string(cls, level):
@@ -96,7 +113,7 @@ class Geoid(object):
 
     @classmethod
     def make_regex(cls, level):
-        import re
+
 
         sl_entry = summary_levels[level]
 
@@ -106,10 +123,15 @@ class Geoid(object):
 
         re_str = '^' + ''.join(regexes) + "$"
 
-        return re.compile(re_str)
+        return re_str
 
     @classmethod
     def augment(cls):
+        """Augment the class with computed formats, regexes, and other things. This caches these values so
+        they don't have to be created for every instance. """
+
+        import re
+
         level_name = cls.__name__.lower()
 
         sl_entry = summary_levels[level_name]
@@ -122,12 +144,24 @@ class Geoid(object):
 
         cls.fmt = cls.make_format_string(cls.__name__.lower())
 
-        cls.regex = cls.make_regex(cls.__name__.lower())
+        cls.regex_str = cls.make_regex(cls.__name__.lower())
+        cls.regex = re.compile(cls.regex_str)
 
-    def __init__(self, **kwargs):
+        # List of field names
+        cls.fields = sl_entry[3] + [level_name]
 
-        for k, v in kwargs.items():
-            setattr(self, k, self.encode.__func__(v))
+    def __init__(self, *args, **kwargs):
+
+        # This is a bit unusual, because it means, that , unlike nornal
+        # python args, a kwarg can overwrite a position arg.
+
+        d = dict(zip(self.fields, args))
+
+        d.update(kwargs)
+
+        for k, v in d.items():
+            if k in self.fields:
+                setattr(self, k, self.encode.__func__(v))
 
     def __str__(self):
 
@@ -147,7 +181,12 @@ class Geoid(object):
 
         cls, sl_entry = cls.sl_map[sl]
 
-        d = cls.regex.match(gvid).groupdict()
+        m = cls.regex.match(gvid)
+
+        if not m:
+            raise Exception("Failed to match '{}' to '{}' ".format(gvid,cls.regex_str))
+
+        d = m.groupdict()
 
         if not d:
             return None
