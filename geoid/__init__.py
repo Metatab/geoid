@@ -20,7 +20,6 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
 
 
 
-
 def base62_encode(num):
     """Encode a number in Base X. WIth the built-in alphabet, its base 62
 
@@ -28,7 +27,9 @@ def base62_encode(num):
     `alphabet`: The alphabet to use for encoding
     Stolen from: http://stackoverflow.com/a/1119769/1144479
     """
-    
+
+    num = int(num)
+
     alphabet="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     
     if (num == 0):
@@ -99,7 +100,10 @@ class Geoid(object):
 
     @classmethod
     def resolve_summary_level(cls, sl):
-        return cls.sl_map[cls.encode.__func__(sl)][0]
+        try:
+            return cls.sl_map[cls.encode.__func__(sl)][0]
+        except KeyError:
+            return None
 
     @classmethod
     def make_format_string(cls, level):
@@ -168,7 +172,7 @@ class Geoid(object):
         d = self.__dict__
         d['sl'] = self.sl
 
-        return self.fmt.format(**self.__dict__)
+        return self.fmt.format(**d)
 
     @classmethod
     def parse(cls, gvid):

@@ -18,7 +18,7 @@ class AcsGeoid(Geoid):
     elem_format = '{{{}:0{}d}}'
     sl_regex = ''
     elem_regex = '(?P<{}>.{{{}}})'
-    encode = lambda x: x
+    encode = lambda x: int(x)
     decode = lambda x: int(x)
 
     @classmethod
