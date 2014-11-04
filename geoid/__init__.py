@@ -19,7 +19,6 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
 }
 
 
-
 def base62_encode(num):
     """Encode a number in Base X. WIth the built-in alphabet, its base 62
 
@@ -204,3 +203,39 @@ class Geoid(object):
 
         return cls(**d)
 
+
+def generate_all(sumlevel, d):
+    """Generate a dict that includes all of the available geoid values, with keys
+    for the most common names for those values. """
+
+    from geoid.civick import GVid
+    from geoid.tiger import TigerGeoid
+    from geoid.acs import AcsGeoid
+
+    d = dict(d.items())
+
+    # Map common name variants
+    if 'cousub' in d:
+        d['cosub'] = d['cousub']
+        del d['cousub']
+
+
+    if 'blkgrp' in d:
+        d['blockgroup'] = d['blkgrp']
+        del d['blkgrp']
+
+
+
+    gvid_class = GVid.resolve_summary_level(sumlevel)
+
+    if not gvid_class:
+        return {}
+
+    geoidt_class = TigerGeoid.resolve_summary_level(sumlevel)
+    geoid_class = AcsGeoid.resolve_summary_level(sumlevel)
+
+    return dict(
+        gvid = str(gvid_class(**d)),
+        geoid = str(geoid_class(**d)),
+        geoidt = str(geoidt_class(**d))
+    )
