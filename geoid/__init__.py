@@ -7,12 +7,12 @@ __author__ = "eric@civicknowledge.com"
 
 summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
     'region' : (20,1,1,[]),
-    'division' : (30,1,1,['region']),
+    'division' : (30,1,1,[]),
     'state' : (40,2,2,[]),
     'county' : (50,3,2,['state']),
     'cosub' : (60,5,3,['state','county']),
     'place' : (160,5,4,['state']),
-    'urbanarea': (999,5, 4, []),
+    'ua': (400,5, 4, []),
     'tract' : (140,6,5,['state','county']),
     'blockgroup' : (150,1,1,['state','county','tract']), # Appears to always be the 1000's digit of block.
     'block' : (101,4,2,['state','county','tract']),
@@ -78,7 +78,16 @@ def augment(module_name, base_class):
         cls.augment()
 
 def make_classes(base_class, module):
-    """Create derived classes and put them into the same module as the base class"""
+    """Create derived classes and put them into the same module as the base class.
+
+    This function is called at the end of each of the derived calss modules, acs, census, civik and tiger.
+    It will create a set of new derived class in the module, one for  each of the enries in the `summary_levels`
+    dict.
+
+    """
+
+    all_classes_by_name = {}
+    all_classes_by_sl = {}
 
     for k, v in summary_levels.items():
 
@@ -89,13 +98,8 @@ def make_classes(base_class, module):
         setattr(module, k.capitalize(), cls)
 
 
-
 class Geoid(object):
 
-    # sl_format = '{sl:0>2s}'
-    # elem_format = '{{{}:0>{}s}}'
-    # sl_regex = '(?P<sl>.{2})'
-    # elem_regex = '(?P<{}>.{{{}}})'
 
     @classmethod
     def resolve_summary_level(cls, sl):
@@ -116,7 +120,6 @@ class Geoid(object):
 
     @classmethod
     def make_regex(cls, level):
-
 
         sl_entry = summary_levels[level]
 
@@ -139,7 +142,7 @@ class Geoid(object):
 
         sl_entry = summary_levels[level_name]
 
-        cls.sl = cls.encode.__func__(sl_entry[0])
+        cls.sl = sl_entry[0]
 
         cls.class_map[cls.__name__.lower()] = cls
 
@@ -153,6 +156,21 @@ class Geoid(object):
         # List of field names
         cls.fields = sl_entry[3] + [level_name]
 
+    @classmethod
+    def get_class(cls, name_or_sl):
+        """Return a derived calss based on the class name or the summar_level"""
+
+        try:
+            int(name_or_sl)
+
+            return cls.sl_map[name_or_sl][0]
+
+        except ValueError:
+
+            return cls.class_map[name_or_sl.lower()]
+
+
+
     def __init__(self, *args, **kwargs):
 
         # This is a bit unusual, because it means, that , unlike nornal
@@ -164,23 +182,33 @@ class Geoid(object):
 
         for k, v in d.items():
             if k in self.fields:
-                setattr(self, k, self.encode.__func__(v))
+                try:
+                    setattr(self, k, v)
+                except TypeError as e:
+                    raise TypeError("Failed to convert '{}' ({}) for field '{}' in {}: {}"
+                                    .format(v, type(v), k, type(self), e))
+                except ValueError as e:
+                    raise ValueError("Failed to convert '{}' ({}) for field '{}' in {}: {}"
+                        .format(v, type(v), k, type(self), e))
+
+
 
     def __str__(self):
 
         d = self.__dict__
         d['sl'] = self.sl
 
-        return self.fmt.format(**d)
+        return self.fmt.format(**{ k:self.encode.__func__(v) for k,v in d.items() })
 
     @classmethod
     def parse(cls, gvid):
 
         if not cls.sl:
-            sl = gvid[0:cls.sl_width]  # Civick and ACS include the SL, so can call from base type.
+            sl = cls.decode.__func__(gvid[0:cls.sl_width])  # Civick and ACS include the SL, so can call from base type.
 
         else:
             sl = cls.sl # Otherwise must use derived class.
+
 
         cls, sl_entry = cls.sl_map[sl]
 
@@ -200,6 +228,17 @@ class Geoid(object):
             del d['sl']
         except KeyError:
             pass
+
+        return cls(**d)
+
+    def convert(self,root_cls):
+        """Convert to another derived class. cls is the base class for the derived type,
+        ie AcsGeoid, TigerGeoid, etc. """
+
+        d = self.__dict__
+        d['sl'] = self.sl
+
+        cls = root_cls.get_class(self.sl)
 
         return cls(**d)
 

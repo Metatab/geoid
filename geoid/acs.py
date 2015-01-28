@@ -12,11 +12,11 @@ class AcsGeoid(Geoid):
     sl_map = {}
     name_map = {}
 
-    sl_width = 2
+    sl_width = 3
     width_pos = 1
     sl_format = '{sl:0>3d}00US' # The '00' bit is for the geo component, always 00 in our use.
     elem_format = '{{{}:0{}d}}'
-    sl_regex = ''
+    sl_regex = '(?P<sl>.{3})00US'
     elem_regex = '(?P<{}>.{{{}}})'
     encode = lambda x: int(x)
     decode = lambda x: int(x)
