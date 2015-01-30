@@ -16,6 +16,11 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
     'tract' : (140,6,5,['state','county']),
     'blockgroup' : (150,1,1,['state','county','tract']), # Appears to always be the 1000's digit of block.
     'block' : (101,4,2,['state','county','tract']),
+    'sdelm': (950, 5, 4, ['state']),
+    'sdsec': (960, 5, 4, ['state']),
+    'sduni': (970, 5, 4, ['state']),
+    'zcta': (860, 5, 4, ['state']),
+
 }
 
 
@@ -161,9 +166,7 @@ class Geoid(object):
         """Return a derived calss based on the class name or the summar_level"""
 
         try:
-            int(name_or_sl)
-
-            return cls.sl_map[name_or_sl][0]
+            return cls.sl_map[int(name_or_sl)][0]
 
         except ValueError:
 
