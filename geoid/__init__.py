@@ -2,7 +2,7 @@
 
 """
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __author__ = "eric@civicknowledge.com"
 
 summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
@@ -22,6 +22,8 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
     'zcta': (860, 5, 4, ['state']),
 
 }
+
+
 
 
 def base62_encode(num):
