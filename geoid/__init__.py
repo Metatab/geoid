@@ -19,7 +19,7 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
     'sdelm': (950, 5, 4, ['state']),
     'sdsec': (960, 5, 4, ['state']),
     'sduni': (970, 5, 4, ['state']),
-    'zcta': (860, 5, 4, ['state']),
+    'zcta': (860, 5, 4, []),
 
 }
 
@@ -111,7 +111,7 @@ class Geoid(object):
     @classmethod
     def resolve_summary_level(cls, sl):
         try:
-            return cls.sl_map[cls.encode.__func__(sl)][0]
+            return cls.sl_map[sl][0]
         except KeyError:
             return None
 
@@ -203,8 +203,10 @@ class Geoid(object):
         d = self.__dict__
         d['sl'] = self.sl
 
-        return self.fmt.format(**{ k:self.encode.__func__(v) for k,v in d.items() })
-
+        try:
+            return self.fmt.format(**{ k:self.encode.__func__(v) for k,v in d.items() })
+        except ValueError as e:
+            raise ValueError("Bad value in {}: {}".format(d, e))
     @classmethod
     def parse(cls, gvid):
 
@@ -256,6 +258,8 @@ def generate_all(sumlevel, d):
     from geoid.tiger import TigerGeoid
     from geoid.acs import AcsGeoid
 
+    sumlevel = int(sumlevel)
+
     d = dict(d.items())
 
     # Map common name variants
@@ -268,7 +272,9 @@ def generate_all(sumlevel, d):
         d['blockgroup'] = d['blkgrp']
         del d['blkgrp']
 
-
+    if 'zcta5' in d:
+        d['zcta'] = d['zcta5']
+        del d['zcta5']
 
     gvid_class = GVid.resolve_summary_level(sumlevel)
 
@@ -278,8 +284,12 @@ def generate_all(sumlevel, d):
     geoidt_class = TigerGeoid.resolve_summary_level(sumlevel)
     geoid_class = AcsGeoid.resolve_summary_level(sumlevel)
 
-    return dict(
-        gvid = str(gvid_class(**d)),
-        geoid = str(geoid_class(**d)),
-        geoidt = str(geoidt_class(**d))
-    )
+    try:
+        return dict(
+            gvid = str(gvid_class(**d)),
+            geoid = str(geoid_class(**d)),
+            geoidt = str(geoidt_class(**d))
+        )
+    except:
+        
+        raise
