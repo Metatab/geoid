@@ -20,10 +20,7 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
     'sdsec': (960, 5, 4, ['state']),
     'sduni': (970, 5, 4, ['state']),
     'zcta': (860, 5, 4, []),
-
 }
-
-
 
 
 def base62_encode(num):
@@ -84,6 +81,14 @@ def augment(module_name, base_class):
 
         cls.augment()
 
+def get_class(module, sl):
+
+    for name, e in summary_levels.items():
+        if e[0] == sl:
+            return getattr(module, name.capitalize())
+
+    raise Exception("No class for summary_level {}".format(sl))
+
 def make_classes(base_class, module):
     """Create derived classes and put them into the same module as the base class.
 
@@ -92,9 +97,8 @@ def make_classes(base_class, module):
     dict.
 
     """
+    from functools import partial
 
-    all_classes_by_name = {}
-    all_classes_by_sl = {}
 
     for k, v in summary_levels.items():
 
@@ -103,6 +107,8 @@ def make_classes(base_class, module):
         cls.augment()
 
         setattr(module, k.capitalize(), cls)
+
+    setattr(module, 'get_class', partial(get_class, module))
 
 
 class Geoid(object):
@@ -165,13 +171,11 @@ class Geoid(object):
 
     @classmethod
     def get_class(cls, name_or_sl):
-        """Return a derived calss based on the class name or the summar_level"""
-
+        """Return a derived calss based on the class name or the summary_level"""
         try:
             return cls.sl_map[int(name_or_sl)][0]
 
         except ValueError:
-
             return cls.class_map[name_or_sl.lower()]
 
 
@@ -245,7 +249,11 @@ class Geoid(object):
         d = self.__dict__
         d['sl'] = self.sl
 
-        cls = root_cls.get_class(self.sl)
+        try:
+            cls = root_cls.get_class(root_cls.sl)
+        except AttributeError:
+            # Hopefully because root_cls is a module
+            cls = root_cls.get_class(self.sl)
 
         return cls(**d)
 
@@ -291,5 +299,5 @@ def generate_all(sumlevel, d):
             geoidt = str(geoidt_class(**d))
         )
     except:
-        
+
         raise

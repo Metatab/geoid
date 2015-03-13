@@ -48,6 +48,31 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('2g061a0000y',
                          str(civick.GVid.parse('2g061a0000y').convert(tiger.TigerGeoid).convert(civick.GVid)))
 
+    def test_convert(self):
+        from geoid import tiger
+        from geoid import acs
+        from geoid import civick
+
+        g = acs.Blockgroup(53, 33,1800,3)
+
+
+
+        print str(g)
+        cg = g.convert(civick)
+
+        print str(g)
+        cg = g.convert(civick.Blockgroup)
+
+        print str(cg)
+
+        cg = g.convert(civick.County)
+
+        print str(cg)
+
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
