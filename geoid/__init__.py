@@ -2,7 +2,7 @@
 
 """
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 __author__ = "eric@civicknowledge.com"
 
 summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
