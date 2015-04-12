@@ -54,8 +54,8 @@ setup(
     scripts=scripts,
     install_requires=requires,
     author=geoid.__author__,
-    author_email='eric@sandiegodata.org',
-    url='https://github.com/streeter/python-skeleton',
+    author_email='eric@civicknowledge',
+    url='https://github.com/CivicKnowledge/geoid',
     license='LICENSE',
     classifiers=classifiers,
 )

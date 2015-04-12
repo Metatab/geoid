@@ -70,9 +70,63 @@ class BasicTests(unittest.TestCase):
         print str(cg)
 
 
+    def test_promote(self):
+        from geoid import tiger
+        from geoid import acs
+        from geoid import civick
+
+        g = acs.Blockgroup(53, 33, 1800, 3)
+
+        self.assertEquals(acs.Tract, type(g.promote()))
+        self.assertEquals(acs.County, type(g.promote().promote()))
+        self.assertEquals(acs.State, type(g.promote().promote().promote()))
+        self.assertEquals(None, g.promote().promote().promote().promote())
+
+        self.assertEquals(acs.State, type(g.promote('state')))
+        self.assertEquals('04000US53', str(g.promote('state')))
 
 
+        # The Summary value, with all 0 except for the summary level, represents the summary level
+        self.assertEquals('15000US000000000000', str(g.summarize()))
+        self.assertEquals('14000US00000000000', str(g.promote().summarize()))
+        self.assertEquals('05000US00000', str(g.promote().promote().summarize()))
 
+        # The all value represents all of the lower summary level values at the higher summary level.
+        self.assertEquals('15000US530330018000',  str(g.allval()))
+        self.assertEquals('14000US53033000000', str(g.promote().allval()))
+        self.assertEquals('05000US53000', str(g.promote().promote().allval()))
+
+        print g.summarize().__dict__
+        print g.allval().__dict__
+
+    def test_simplify(self):
+
+        from geoid import acs
+        from geoid.util import simplify
+
+
+        geoids = []
+
+        for state in [10,11,12]:
+            geoids.append(acs.State(state))
+
+        for state in [1,2]:
+            for county in range(1,6):
+                geoids.append(acs.County(state, county))
+
+        for state in [3,4]:
+            for county in range(1,4):
+                geoids.append(acs.County(state, county))
+
+
+        print simplify(geoids)
+
+    def test_dump(self):
+        from geoid import summary_levels
+        from geoid import civick
+
+        for k,v in summary_levels.items():
+            print "<option value={}>{}</option>".format(str(civick.GVid.get_class(k)().summarize() ), k.capitalize())
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,7 +2,7 @@
 
 """
 
-__version__ = '0.0.2'
+__version__ = '0.0.4'
 __author__ = "eric@civicknowledge.com"
 
 summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
@@ -20,6 +20,7 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
     'sdsec': (960, 5, 4, ['state']),
     'sduni': (970, 5, 4, ['state']),
     'zcta': (860, 5, 4, []),
+    'zip': (1200, 5, 4, [])
 }
 
 
@@ -167,6 +168,7 @@ class Geoid(object):
         cls.regex = re.compile(cls.regex_str)
 
         # List of field names
+        cls.level = level_name
         cls.fields = sl_entry[3] + [level_name]
 
     @classmethod
@@ -185,7 +187,7 @@ class Geoid(object):
         # This is a bit unusual, because it means, that , unlike nornal
         # python args, a kwarg can overwrite a position arg.
 
-        d = dict(zip(self.fields, args))
+        d = dict(zip(self.fields, args+ ((0,)*10))) # Add enough zeros to set all fields to zero
 
         d.update(kwargs)
 
@@ -208,18 +210,31 @@ class Geoid(object):
         d['sl'] = self.sl
 
         try:
+
             return self.fmt.format(**{ k:self.encode.__func__(v) for k,v in d.items() })
         except ValueError as e:
             raise ValueError("Bad value in {}: {}".format(d, e))
+
+    def __hash__(self):
+        return hash(str(self))
+
+    def __cmp__(self, other):
+        return cmp(str(self), str(other))
+
     @classmethod
     def parse(cls, gvid):
 
-        if not cls.sl:
-            sl = cls.decode.__func__(gvid[0:cls.sl_width])  # Civick and ACS include the SL, so can call from base type.
+        if not bool(gvid):
+            return None
 
-        else:
-            sl = cls.sl # Otherwise must use derived class.
+        try:
+            if not cls.sl:
+                sl = cls.decode.__func__(gvid[0:cls.sl_width])  # Civick and ACS include the SL, so can call from base type.
 
+            else:
+                sl = cls.sl # Otherwise must use derived class.
+        except ValueError as e:
+            raise ValueError("Failed to parse gvid '{}': {}".format(gvid, str(e)))
 
         cls, sl_entry = cls.sl_map[sl]
 
@@ -256,6 +271,49 @@ class Geoid(object):
             cls = root_cls.get_class(self.sl)
 
         return cls(**d)
+
+    def promote(self, level = None):
+        """Convert to the next higher level summary level"""
+
+
+        if level is None:
+
+            if len(self.fields) < 2:
+                return None
+
+            cls = self.get_class(self.fields[-2])
+        else:
+            cls = self.get_class(level)
+
+        d = dict(self.__dict__.items())
+        d['sl'] = self.sl
+
+        return cls(**d)
+
+    def summarize(self):
+        """Convert all of the values to zero. This form is used to represent the summary level"""
+
+
+        d = dict(zip(self.fields,[0]*len(self.fields)))
+        d['sl'] = self.sl
+
+        cls = self.get_class(self.sl)
+
+        return cls(**d)
+
+    def allval(self):
+        """Convert the last value to zero. This form represents the entire higher summary level at the granularity
+        of the lower  summary level. For example, for a county, it means 'All counties in the state' """
+
+        d = dict(self.__dict__.items())
+        d['sl'] = self.sl
+
+        d[self.level] = 0
+
+        cls = self.get_class(self.sl)
+
+        return cls(**d)
+
 
 
 def generate_all(sumlevel, d):
