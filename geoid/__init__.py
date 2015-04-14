@@ -23,6 +23,11 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
     'zip': (1200, 5, 4, [])
 }
 
+plurals = {
+    'county': 'counties',
+    'place': 'places'
+}
+
 
 def base62_encode(num):
     """Encode a number in Base X. WIth the built-in alphabet, its base 62
@@ -100,7 +105,6 @@ def make_classes(base_class, module):
     """
     from functools import partial
 
-
     for k, v in summary_levels.items():
 
         cls = base_class.class_factory(k.capitalize())
@@ -111,9 +115,7 @@ def make_classes(base_class, module):
 
     setattr(module, 'get_class', partial(get_class, module))
 
-
 class Geoid(object):
-
 
     @classmethod
     def resolve_summary_level(cls, sl):
@@ -171,16 +173,16 @@ class Geoid(object):
         cls.level = level_name
         cls.fields = sl_entry[3] + [level_name]
 
+
+
     @classmethod
     def get_class(cls, name_or_sl):
-        """Return a derived calss based on the class name or the summary_level"""
+        """Return a derived class based on the class name or the summary_level"""
         try:
             return cls.sl_map[int(name_or_sl)][0]
 
         except ValueError:
             return cls.class_map[name_or_sl.lower()]
-
-
 
     def __init__(self, *args, **kwargs):
 
@@ -203,14 +205,12 @@ class Geoid(object):
                         .format(v, type(v), k, type(self), e))
 
 
-
     def __str__(self):
 
         d = self.__dict__
         d['sl'] = self.sl
 
         try:
-
             return self.fmt.format(**{ k:self.encode.__func__(v) for k,v in d.items() })
         except ValueError as e:
             raise ValueError("Bad value in {}: {}".format(d, e))
@@ -275,7 +275,6 @@ class Geoid(object):
     def promote(self, level = None):
         """Convert to the next higher level summary level"""
 
-
         if level is None:
 
             if len(self.fields) < 2:
@@ -314,6 +313,31 @@ class Geoid(object):
 
         return cls(**d)
 
+    @property
+    def tuples(self):
+        """Return tuples of field, value, in the order of the levels as they are defined """
+        return  [ (field, getattr(self,field,None)) for field in self.fields ]
+
+
+    @property
+    def is_summary(self):
+        """Return True if this geoid is an summary -- all of the fields are 0"""
+
+        return sum(t[1] for t in self.tuples) == 0
+
+
+    @property
+    def is_allval(self):
+        """Return True if this geoid is an allval -- the last field is zero, but the first is not"""
+
+        tups = self.tuples
+
+        return tups[-1][1] == 0 and tups[0][1] != 0
+
+    @property
+    def level_plural(self):
+        """Return the name of the level as a plural"""
+        return plurals.get(self.level,self.level+"s")
 
 
 def generate_all(sumlevel, d):

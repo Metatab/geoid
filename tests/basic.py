@@ -85,7 +85,6 @@ class BasicTests(unittest.TestCase):
         self.assertEquals(acs.State, type(g.promote('state')))
         self.assertEquals('04000US53', str(g.promote('state')))
 
-
         # The Summary value, with all 0 except for the summary level, represents the summary level
         self.assertEquals('15000US000000000000', str(g.summarize()))
         self.assertEquals('14000US00000000000', str(g.promote().summarize()))
@@ -96,8 +95,15 @@ class BasicTests(unittest.TestCase):
         self.assertEquals('14000US53033000000', str(g.promote().allval()))
         self.assertEquals('05000US53000', str(g.promote().promote().allval()))
 
-        print g.summarize().__dict__
-        print g.allval().__dict__
+        self.assertEquals(g.summarize().county, 0)
+        self.assertEquals(g.allval().county, 33)
+        self.assertEquals(g.allval().blockgroup, 0)
+
+        self.assertTrue(g.summarize().is_summary)
+        self.assertFalse(g.allval().is_summary)
+
+        self.assertTrue(g.allval().is_allval)
+        self.assertFalse(g.summarize().is_allval)
 
     def test_simplify(self):
 
