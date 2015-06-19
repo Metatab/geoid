@@ -12,7 +12,6 @@ def simplify(geoids):
     from collections import defaultdict
 
     aggregated = defaultdict(set)
-    grains = set()
 
     d = {}
 
@@ -27,9 +26,9 @@ def simplify(geoids):
 
         aggregated[av].add(g)
 
-        grains.add(g.summarize())
-
     compiled = set()
+
+    print '!!!', aggregated
 
     for k, v in aggregated.items():
         if len(v) >= 5:
@@ -39,4 +38,25 @@ def simplify(geoids):
 
             compiled |= v
 
-    return compiled, grains
+    return compiled
+
+def isimplify(geoids):
+    """Iteratively simplify until the set stops getting smaller. """
+
+    s0 = list(geoids)
+
+    for i in range(10):
+        s1 = simplify(s0)
+
+        if len(s1) == len(s0):
+            return s1
+
+        s0 = s1
+
+def iallval(t):
+    """Recursively promote and compute allvals """
+
+    if t:
+        return [t.allval()] + iallval(t.promote())
+    else:
+        return []

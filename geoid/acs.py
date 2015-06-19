@@ -28,5 +28,12 @@ class AcsGeoid(Geoid):
 
         return type(name, (cls,), {"__init__": __init__})
 
+    def summarize(self):
+        """Convert all of the values to their max values. This form is used to represent the summary level"""
+
+        s = str(self.allval())
+
+        return self.parse(s[:7] + ''.join(['9'] * len(s[7:])))
+
 
 make_classes(AcsGeoid, sys.modules[__name__])

@@ -2,10 +2,11 @@
 
 """
 
-__version__ = '0.0.5'
+__version__ = '0.0.9'
 __author__ = "eric@civicknowledge.com"
 
 summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
+    'us': (10, 0, 0, []), # Both a summary and an allval
     'region' : (20,1,1,[]),
     'division' : (30,1,1,[]),
     'state' : (40,2,2,[]),
@@ -27,6 +28,9 @@ plurals = {
     'county': 'counties',
     'place': 'places'
 }
+
+class NotASummaryName(Exception):
+    """An argument was not one of the valid summary names"""
 
 
 def base62_encode(num):
@@ -93,7 +97,7 @@ def get_class(module, sl):
         if e[0] == sl:
             return getattr(module, name.capitalize())
 
-    raise Exception("No class for summary_level {}".format(sl))
+    raise NotASummaryName("No class for summary_level {}".format(sl))
 
 def make_classes(base_class, module):
     """Create derived classes and put them into the same module as the base class.
@@ -130,7 +134,8 @@ class Geoid(object):
 
         segs = sl_entry[3] + [level]
 
-        formats = [cls.sl_format] + [cls.elem_format.format(seg, summary_levels[seg][cls.width_pos]) for seg in segs]
+        formats = [cls.sl_format] + [cls.elem_format.format(seg, summary_levels[seg][cls.width_pos])
+                                     for seg in segs if summary_levels[seg][cls.width_pos] > 0]
 
         return ''.join(formats)
 
@@ -141,7 +146,9 @@ class Geoid(object):
 
         segs = sl_entry[3] + [level]
 
-        regexes = [cls.sl_regex] + [cls.elem_regex.format(seg, summary_levels[seg][cls.width_pos]) for seg in segs]
+        regexes = [cls.sl_regex] + [cls.elem_regex.format(seg, summary_levels[seg][cls.width_pos])
+                                    for seg in segs if summary_levels[seg][cls.width_pos] > 0]
+
 
         re_str = '^' + ''.join(regexes) + "$"
 
@@ -173,7 +180,8 @@ class Geoid(object):
         cls.level = level_name
         cls.fields = sl_entry[3] + [level_name]
 
-
+        # maxval, indicates a summary level entry
+        cls.maxval =  62 ** cls.sl_map[cls.sl][1][2]
 
     @classmethod
     def get_class(cls, name_or_sl):
@@ -181,8 +189,13 @@ class Geoid(object):
         try:
             return cls.sl_map[int(name_or_sl)][0]
 
+        except TypeError as e:
+            raise TypeError("Bad name or sl: {} : {}".format(name_or_sl, e))
         except ValueError:
-            return cls.class_map[name_or_sl.lower()]
+            try:
+                return cls.class_map[name_or_sl.lower()]
+            except (KeyError, ValueError):
+                raise NotASummaryName("Value '{}' is not a valid summary level".format(name_or_sl))
 
     def __init__(self, *args, **kwargs):
 
@@ -266,7 +279,7 @@ class Geoid(object):
 
         try:
             cls = root_cls.get_class(root_cls.sl)
-        except AttributeError:
+        except (AttributeError, TypeError):
             # Hopefully because root_cls is a module
             cls = root_cls.get_class(self.sl)
 
@@ -278,9 +291,12 @@ class Geoid(object):
         if level is None:
 
             if len(self.fields) < 2:
-                return None
-
-            cls = self.get_class(self.fields[-2])
+                if self.level in ('region','division','state','ua'):
+                    cls = self.get_class('us')
+                else:
+                    return None
+            else:
+                cls = self.get_class(self.fields[-2])
         else:
             cls = self.get_class(level)
 
@@ -290,15 +306,9 @@ class Geoid(object):
         return cls(**d)
 
     def summarize(self):
-        """Convert all of the values to zero. This form is used to represent the summary level"""
+        """Convert all of the values to their max values. This form is used to represent the summary level"""
 
-
-        d = dict(zip(self.fields,[0]*len(self.fields)))
-        d['sl'] = self.sl
-
-        cls = self.get_class(self.sl)
-
-        return cls(**d)
+        raise NotImplementedError
 
     def allval(self):
         """Convert the last value to zero. This form represents the entire higher summary level at the granularity
@@ -318,13 +328,11 @@ class Geoid(object):
         """Return tuples of field, value, in the order of the levels as they are defined """
         return  [ (field, getattr(self,field,None)) for field in self.fields ]
 
-
     @property
     def is_summary(self):
         """Return True if this geoid is an summary -- all of the fields are 0"""
 
-        return sum(t[1] for t in self.tuples) == 0
-
+        return str(self) == str(self.summarize())
 
     @property
     def is_allval(self):
