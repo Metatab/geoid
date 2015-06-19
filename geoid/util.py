@@ -28,14 +28,12 @@ def simplify(geoids):
 
     compiled = set()
 
-    print '!!!', aggregated
 
     for k, v in aggregated.items():
         if len(v) >= 5:
             compiled.add(k)
             compiled.add(k.promote())
         else:
-
             compiled |= v
 
     return compiled
