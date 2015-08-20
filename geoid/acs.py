@@ -1,7 +1,11 @@
-
-
 from . import base62_encode, base62_decode, Geoid, make_classes
 import sys
+
+def mostly_int(v):
+    try:
+        return int(v)
+    except ValueError:
+        return v
 
 class AcsGeoid(Geoid):
 
@@ -13,13 +17,18 @@ class AcsGeoid(Geoid):
     name_map = {}
 
     sl_width = 3
-    width_pos = 1
-    sl_format = '{sl:0>3d}00US' # The '00' bit is for the geo component, always 00 in our use.
+
+    sl_format = '{sl:0>3d}00US'
     elem_format = '{{{}:0{}d}}'
-    sl_regex = '(?P<sl>.{3})00US'
+    elem_str_format = '{{{}:s}}'
+    sl_regex = '(?P<sl>.{3})..US'
     elem_regex = '(?P<{}>.{{{}}})'
-    encode = lambda x: int(x)
-    decode = lambda x: int(x)
+    encode = mostly_int
+    decode = mostly_int
+
+    @classmethod
+    def part_width(cls, dec_width):
+        return dec_width
 
     @classmethod
     def class_factory(cls, name):

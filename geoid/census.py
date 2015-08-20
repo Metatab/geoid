@@ -13,13 +13,18 @@ class CensusGeoid(Geoid):
     name_map = {}
 
     sl_width = 3
-    width_pos = 1
+
     sl_format = '' # The '00' bit is for the geo component, always 00 in our use.
-    elem_format = '{{{}:0{}d}}'
+    elem_format =     '{{{}:0{}d}}'
+    elem_str_format = '{{{}:s}}'
     sl_regex = ''
     elem_regex = '(?P<{}>.{{{}}})'
     encode = lambda x: int(x)
     decode = lambda x: int(x)
+
+    @classmethod
+    def part_width(cls, dec_width):
+        return dec_width
 
     @classmethod
     def class_factory(cls, name):
