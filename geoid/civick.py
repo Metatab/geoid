@@ -26,9 +26,9 @@ class GVid(Geoid):
 
     @classmethod
     def part_width(cls, dec_width):
-        # Convert a decimal number of digits to a base 62 number of digits, the hard way
-        # probably would be faster to use log()
-        return len(base62_encode(10**dec_width))
+        # Convert a decimal number of digits to a base 62 number of digits, via strings.
+        # Maybe would be faster to use log()?
+        return len(base62_encode(int('9'*int(dec_width))))
 
     @classmethod
     def class_factory(cls, name):

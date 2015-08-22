@@ -18,7 +18,7 @@ class BasicTests(unittest.TestCase):
 
         self.assertEqual('2g061a000y', str(civick.GVid.parse(str(tract))))
 
-        self.assertEqual('0a0', str(civick.GVid.parse(str(civick.Us()))))
+        self.assertEqual('0a', str(civick.GVid.parse(str(civick.Us()))))
 
         self.assertEqual('2g061a000y', str(civick.Tract(6, 72, 34)))
         self.assertEqual('2g061a000y', str(civick.Tract.parse('2g061a000y')))
@@ -130,22 +130,18 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('0O0600', str(g.allval()))
 
         g = civick.GVid.parse('0E06')
-        self.assertEqual('0a0', str(g.promote()))
+        self.assertEqual('0a', str(g.promote()))
 
         self.assertEqual(None,  civick.Us().promote())
-        self.assertEqual('0aZ', str(civick.Us().summarize()))
-        self.assertEqual('0a0', str(civick.Us().allval()))
-
-
+        self.assertEqual('0a', str(civick.Us().summarize()))
+        self.assertEqual('0a', str(civick.Us().allval()))
 
         print [ str(x) for x in  iallval(civick.Blockgroup(53, 33, 1800, 3))]
-
 
     def test_simplify(self):
 
         from geoid import acs
         from geoid.util import simplify, isimplify
-
 
         geoids = []
 
