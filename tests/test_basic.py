@@ -37,7 +37,9 @@ class BasicTests(unittest.TestCase):
 
         self.assertEqual(str(acs.State(53)), str(acs.AcsGeoid.parse('04000US53')))
         self.assertEqual(str(acs.County(53, 9)), str(acs.AcsGeoid.parse('05000US53009')))
-        self.assertEqual(str(acs.Blockgroup(29, 99, 701401, 2)), str(acs.AcsGeoid.parse('15000US290997014012')))
+        self.assertEqual(
+            str(acs.Blockgroup(29, 99, 701401, 2)),
+            str(acs.AcsGeoid.parse('15000US290997014012')))
         self.assertEqual(str(acs.Blockgroup(53, 33, 1800, 3)), str(acs.AcsGeoid.parse('15000US530330018003')))
 
         # Just test that the parsing doesn't throw an exception
