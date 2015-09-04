@@ -5,18 +5,20 @@
 __version__ = '0.0.10'
 __author__ = "eric@civicknowledge.com"
 
+import six
+
 names = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
     'us': 10,
-    'region' : 20,
-    'division' : 30,
-    'state' : 40,
-    'county' : 50,
-    'cosub' : 60,
-    'place' : 160,
+    'region': 20,
+    'division': 30,
+    'state': 40,
+    'county': 50,
+    'cosub': 60,
+    'place': 160,
     'ua': 400,
-    'tract' : 140,
-    'blockgroup' : 150,
-    'block' : 101,
+    'tract': 140,
+    'blockgroup': 150,
+    'block': 101,
     'sdelm': 950,
     'sdsec': 960,
     'sduni': 970,
@@ -97,7 +99,7 @@ names = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
 # Lengths in number of decimal digits
 lengths = {
     'aianhh': 4,  # American Indian Area/Alaska Native Area/ Hawaiian Home Land (Census)
-    'aihhtli': "1",  # American Indian Trust Land/ Hawaiian Home Land Indicator
+    'aihhtli': 1,  # American Indian Trust Land/ Hawaiian Home Land Indicator
     'aitsce': 3,  # American Indian Tribal Subdivision (Census)
     'anrc': 5,  # Alaska Native Regional Corporation (FIPS)
     'blkgrp': 1,  # Block Group
@@ -122,7 +124,7 @@ lengths = {
     'sdsec': 5,  # State-School District (Secondary)
     'sduni': 5,  # State-School District (Unified)
     'sldl': 3,  # State Legislative District Lower
-    'sldu': "3",  # State Legislative District Upper
+    'sldu': 3,  # State Legislative District Upper
     'state': 2,  # State (FIPS Code)
     'submcd': 5,  # Subminor Civil Division (FIPS)
     'tract': 6,  # Census Tract
@@ -132,7 +134,6 @@ lengths = {
     'zcta': 5,
     # Nonstandard
     'zip': 5,
-
 }
 
 segments = {
@@ -146,7 +147,7 @@ segments = {
     67: ['state', 'county', 'cousub', 'submcd'],  # State (Puerto Rico Only)-County-County Subdivision-Subbarrio
     70: ['state', 'county', 'cousub', 'place'],  # County Subdivision-Place/Remainder
     80: ['state', 'county', 'cousub', 'place', 'tract'],  # County Subdivision-Place/Remainder-Census Tract
-    101: ['state','county','tract', 'block'],
+    101: ['state', 'county', 'tract', 'block'],
     140: ['state', 'county', 'tract'],  # Census Tract
     150: ['state', 'county', 'tract', 'blockgroup'],  # Census Tract-Block Group
     155: ['state', 'place', 'county'],  # Place-County
@@ -233,11 +234,14 @@ plurals = {
     'place': 'places'
 }
 
+
 class NotASummaryName(Exception):
     """An argument was not one of the valid summary names"""
 
+
 class ParseError(Exception):
     """Error parsing a geoid"""
+
 
 def base62_encode(num):
     """Encode a number in Base X. WIth the built-in alphabet, its base 62
@@ -249,8 +253,8 @@ def base62_encode(num):
 
     num = int(num)
 
-    alphabet="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    
+    alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
     if (num == 0):
         return alphabet[0]
     arr = []
@@ -262,6 +266,7 @@ def base62_encode(num):
     arr.reverse()
     return ''.join(arr)
 
+
 def base62_decode(string):
     """Decode a Base X encoded string into the number
 
@@ -270,9 +275,9 @@ def base62_decode(string):
     - `alphabet`: The alphabet to use for encoding
     Stolen from: http://stackoverflow.com/a/1119769/1144479
     """
-    
-    alphabet="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    
+
+    alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
     base = len(alphabet)
     strlen = len(string)
     num = 0
@@ -296,6 +301,7 @@ def augment(module_name, base_class):
             continue
 
         cls.augment()
+
 
 def get_class(module, sl):
 
@@ -324,6 +330,7 @@ def make_classes(base_class, module):
         setattr(module, k.capitalize(), cls)
 
     setattr(module, 'get_class', partial(get_class, module))
+
 
 class Geoid(object):
 
@@ -354,8 +361,7 @@ class Geoid(object):
             else:
                 fmt = cls.elem_str_format
 
-            formats.append( fmt.format(seg, cls.part_width(lengths[seg])))
-
+            formats.append(fmt.format(seg, cls.part_width(lengths[seg])))
 
         return ''.join(formats)
 
@@ -397,7 +403,6 @@ class Geoid(object):
         cls.level = level_name
         cls.fields = segments[cls.sl]
 
-
     @classmethod
     def get_class(cls, name_or_sl):
         """Return a derived class based on the class name or the summary_level"""
@@ -417,7 +422,7 @@ class Geoid(object):
         # This is a bit unusual, because it means, that , unlike nornal
         # python args, a kwarg can overwrite a position arg.
 
-        d = dict(zip(self.fields, args+ ((0,)*10))) # Add enough zeros to set all fields to zero
+        d = dict(zip(self.fields, args + ((0,) * 10)))  # Add enough zeros to set all fields to zero
 
         d.update(kwargs)
 
@@ -430,8 +435,7 @@ class Geoid(object):
                                     .format(v, type(v), k, type(self), e))
                 except ValueError as e:
                     raise ValueError("Failed to convert '{}' ({}) for field '{}' in {}: {}"
-                        .format(v, type(v), k, type(self), e))
-
+                                     .format(v, type(v), k, type(self), e))
 
     def __str__(self):
 
@@ -439,9 +443,11 @@ class Geoid(object):
         d['sl'] = self.sl
 
         try:
-            return self.fmt.format(**{ k:self.encode.__func__(v) for k,v in d.items() })
+            fn = six.get_method_function(self.encode)
+            kwargs = {k: fn(v) for k, v in d.items()}
+            return self.fmt.format(**kwargs)
         except (ValueError, KeyError) as e:
-            raise ValueError("Bad value in {} for {}: {}".format(d, self.fmt, e))
+            raise ValueError('Bad value in {} for {}: {}'.format(d, self.fmt, e))
 
     def __hash__(self):
         return hash(str(self))
@@ -457,10 +463,15 @@ class Geoid(object):
 
         try:
             if not cls.sl:
-                sl = cls.decode.__func__(gvid[0:cls.sl_width])  # Civick and ACS include the SL, so can call from base type.
+                # Civick and ACS include the SL, so can call from base type.
+                if six.PY3:
+                    fn = cls.decode
+                else:
+                    fn = cls.decode.__func__
 
+                sl = fn(gvid[0:cls.sl_width])
             else:
-                sl = cls.sl # Otherwise must use derived class.
+                sl = cls.sl  # Otherwise must use derived class.
         except ValueError as e:
             raise ValueError("Failed to parse gvid '{}': {}".format(gvid, str(e)))
 
@@ -476,7 +487,11 @@ class Geoid(object):
         if not d:
             return None
 
-        d = {k: cls.decode.__func__(v) for k, v in d.items()}
+        if six.PY3:
+            fn = cls.decode
+        else:
+            fn = cls.decode.__func__
+        d = {k: fn(v) for k, v in d.items()}
 
         try:
             del d['sl']
@@ -541,7 +556,7 @@ class Geoid(object):
     @property
     def tuples(self):
         """Return tuples of field, value, in the order of the levels as they are defined """
-        return  [ (field, getattr(self,field,None)) for field in self.fields ]
+        return [(field, getattr(self, field, None)) for field in self.fields]
 
     @property
     def is_summary(self):
@@ -560,7 +575,7 @@ class Geoid(object):
     @property
     def level_plural(self):
         """Return the name of the level as a plural"""
-        return plurals.get(self.level,self.level+"s")
+        return plurals.get(self.level, self.level + "s")
 
 
 def generate_all(sumlevel, d):
