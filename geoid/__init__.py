@@ -2,12 +2,15 @@
 
 """
 
-__version__ = '0.0.11'
-__author__ = "eric@civicknowledge.com"
+__version__ = '0.0.12'
+__author__ = 'eric@civicknowledge.com'
+
+import inspect
+import sys
 
 import six
 
-names = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
+names = {  # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
     'us': 10,
     'region': 20,
     'division': 30,
@@ -96,10 +99,12 @@ names = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
 }
 
 
-# Lengths in number of decimal digits
+# Lengths in number of decimal digits.
+# Note: It's ok to keep string as value - is such case string template will be used instead of int template.
+
 lengths = {
     'aianhh': 4,  # American Indian Area/Alaska Native Area/ Hawaiian Home Land (Census)
-    'aihhtli': 1,  # American Indian Trust Land/ Hawaiian Home Land Indicator
+    'aihhtli': '1',  # American Indian Trust Land/ Hawaiian Home Land Indicator
     'aitsce': 3,  # American Indian Tribal Subdivision (Census)
     'anrc': 5,  # Alaska Native Regional Corporation (FIPS)
     'blkgrp': 1,  # Block Group
@@ -124,7 +129,7 @@ lengths = {
     'sdsec': 5,  # State-School District (Secondary)
     'sduni': 5,  # State-School District (Unified)
     'sldl': 3,  # State Legislative District Lower
-    'sldu': 3,  # State Legislative District Upper
+    'sldu': '3',  # State Legislative District Upper
     'state': 2,  # State (FIPS Code)
     'submcd': 5,  # Subminor Civil Division (FIPS)
     'tract': 6,  # Census Tract
@@ -137,7 +142,6 @@ lengths = {
 }
 
 segments = {
-
     10: ['us'],  # United States
     20: ['region'],  # Region
     30: ['division'],  # Division
@@ -290,7 +294,6 @@ def base62_decode(string):
 
     return int(num)
 
-import inspect,sys
 
 def augment(module_name, base_class):
     """Call the augment() method for all of the derived classes in the module """
@@ -311,12 +314,13 @@ def get_class(module, sl):
 
     raise NotASummaryName("No class for summary_level {}".format(sl))
 
+
 def make_classes(base_class, module):
     """Create derived classes and put them into the same module as the base class.
 
     This function is called at the end of each of the derived calss modules, acs, census, civik and tiger.
-    It will create a set of new derived class in the module, one for  each of the enries in the `summary_levels`
-    dict.
+    It will create a set of new derived class in the module, one for each of the
+    enries in the `summary_levels` dict.
 
     """
     from functools import partial
@@ -353,8 +357,9 @@ class Geoid(object):
         formats.append(cls.sl_format)
 
         for seg in segs:
-            if lengths[seg] <= 0:
-                continue
+            # Lengths dict may have strings to indicate string format usage.
+            if int(lengths[seg]) <= 0:
+                    continue
 
             if isinstance(lengths[seg], int):
                 fmt = cls.elem_format
@@ -372,10 +377,11 @@ class Geoid(object):
 
         segs = segments[sl_num]
 
+        # Lengths dict may have strings to indicate string format usage.
         regexes = [cls.sl_regex] + [cls.elem_regex.format(seg, cls.part_width(lengths[seg]))
-                                    for seg in segs if lengths[seg] > 0]
+                                    for seg in segs if int(lengths[seg]) > 0]
 
-        re_str = '^' + ''.join(regexes) + "$"
+        re_str = '^' + ''.join(regexes) + '$'
 
         return re_str
 
@@ -480,7 +486,7 @@ class Geoid(object):
         m = cls.regex.match(gvid)
 
         if not m:
-            raise ValueError("Failed to match '{}' to '{}' ".format(gvid,cls.regex_str))
+            raise ValueError("Failed to match '{}' to '{}' ".format(gvid, cls.regex_str))
 
         d = m.groupdict()
 
@@ -500,7 +506,7 @@ class Geoid(object):
 
         return cls(**d)
 
-    def convert(self,root_cls):
+    def convert(self, root_cls):
         """Convert to another derived class. cls is the base class for the derived type,
         ie AcsGeoid, TigerGeoid, etc. """
 
@@ -515,13 +521,13 @@ class Geoid(object):
 
         return cls(**d)
 
-    def promote(self, level = None):
+    def promote(self, level=None):
         """Convert to the next higher level summary level"""
 
         if level is None:
 
             if len(self.fields) < 2:
-                if self.level in ('region','division','state','ua'):
+                if self.level in ('region', 'division', 'state', 'ua'):
                     cls = self.get_class('us')
                 else:
                     return None
@@ -595,7 +601,6 @@ def generate_all(sumlevel, d):
         d['cosub'] = d['cousub']
         del d['cousub']
 
-
     if 'blkgrp' in d:
         d['blockgroup'] = d['blkgrp']
         del d['blkgrp']
@@ -614,10 +619,9 @@ def generate_all(sumlevel, d):
 
     try:
         return dict(
-            gvid = str(gvid_class(**d)),
-            geoid = str(geoid_class(**d)),
-            geoidt = str(geoidt_class(**d))
+            gvid=str(gvid_class(**d)),
+            geoid=str(geoid_class(**d)),
+            geoidt=str(geoidt_class(**d))
         )
     except:
-
         raise

@@ -46,10 +46,10 @@ class BasicTests(unittest.TestCase):
         print(str(acs.AcsGeoid.parse('07000US020130159801090')))
         print(str(acs.AcsGeoid.parse('03001US1')))
         print(str(acs.AcsGeoid.parse('030A0US1')))
-        # print(str(acs.AcsGeoid.parse('28300US020110R')))  # FIXME: Raises and exception.
+        print(str(acs.AcsGeoid.parse('28300US020110R')))
         print(str(acs.AcsGeoid.parse('79500US0400101')))
         print(str(acs.AcsGeoid.parse('01000US')))
-        # print(str(acs.AcsGeoid.parse('61000US0200A')))  # FIXME: Raises an exception.
+        print(str(acs.AcsGeoid.parse('61000US0200A')))
 
     def test_parse(self):
         from geoid import tiger
