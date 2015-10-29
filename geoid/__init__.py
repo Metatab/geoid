@@ -2,7 +2,7 @@
 
 """
 
-__version__ = '0.0.9'
+__version__ = '0.0.10'
 __author__ = "eric@civicknowledge.com"
 
 summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
@@ -10,6 +10,7 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
     'region' : (20,1,1,[]),
     'division' : (30,1,1,[]),
     'state' : (40,2,2,[]),
+    'statec' : (1040,2,2,['comp']), # State with a geographic component
     'county' : (50,3,2,['state']),
     'cosub' : (60,5,3,['state','county']),
     'place' : (160,5,4,['state']),
@@ -21,7 +22,7 @@ summary_levels = { # (summary level value, base 10 chars,  Base 62 chars, prefix
     'sdsec': (960, 5, 4, ['state']),
     'sduni': (970, 5, 4, ['state']),
     'zcta': (860, 5, 4, []),
-    'zip': (1200, 5, 4, [])
+    'zip': (1860, 5, 4, [])
 }
 
 plurals = {
