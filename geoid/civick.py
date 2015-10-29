@@ -17,11 +17,18 @@ class GVid(Geoid):
     sl_width = 2
     sl_format = '{sl:0>2s}'
     elem_format = '{{{}:0>{}s}}'
+    elem_str_format = '{{{}:s}}'
     sl_regex = '(?P<sl>.{2})'
     elem_regex = '(?P<{}>.{{{}}})'
-    width_pos = 2
+
     encode = base62_encode
     decode = base62_decode
+
+    @classmethod
+    def part_width(cls, dec_width):
+        # Convert a decimal number of digits to a base 62 number of digits, via strings.
+        # Maybe would be faster to use log()?
+        return len(base62_encode(int('9'*int(dec_width))))
 
     @classmethod
     def class_factory(cls, name):

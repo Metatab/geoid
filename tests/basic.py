@@ -14,13 +14,14 @@ class BasicTests(unittest.TestCase):
 
         tract = civick.Tract(6,72,34)
 
-        self.assertEqual('2g061a0000y', str(tract))
+        self.assertEqual('2g061a000y', str(tract))
 
-        self.assertEqual('2g061a0000y', str(civick.GVid.parse(str(tract))))
+        self.assertEqual('2g061a000y', str(civick.GVid.parse(str(tract))))
 
         self.assertEqual('0a', str(civick.GVid.parse(str(civick.Us()))))
 
-
+        self.assertEqual('2g061a000y', str(civick.Tract(6, 72, 34)))
+        self.assertEqual('2g061a000y', str(civick.Tract.parse('2g061a000y')))
 
     def test_tiger(self):
         from geoid import tiger
@@ -36,7 +37,17 @@ class BasicTests(unittest.TestCase):
 
         self.assertEqual(str(acs.State(53)), str(acs.AcsGeoid.parse('04000US53')))
         self.assertEqual(str(acs.County(53,9)), str(acs.AcsGeoid.parse('05000US53009')))
+        self.assertEqual(str(acs.Blockgroup(29, 99,701401, 2)), str(acs.AcsGeoid.parse('15000US290997014012')))
         self.assertEqual(str(acs.Blockgroup(53, 33,1800,3)), str(acs.AcsGeoid.parse('15000US530330018003')))
+
+        # Just test that the parsing doesn't throw an exception
+        print str(acs.AcsGeoid.parse('07000US020130159801090'))
+        print str(acs.AcsGeoid.parse('03001US1'))
+        print str(acs.AcsGeoid.parse('030A0US1'))
+        print str(acs.AcsGeoid.parse('28300US020110R'))
+        print str(acs.AcsGeoid.parse('79500US0400101'))
+        print str(acs.AcsGeoid.parse('01000US'))
+        print str(acs.AcsGeoid.parse('61000US0200A'))
 
     def test_parse(self):
         from geoid import tiger
@@ -49,8 +60,8 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('440030209032037',
                          str(tiger.Block.parse('440030209032037').convert(civick.GVid).convert(tiger.TigerGeoid)))
 
-        self.assertEqual('2g061a0000y',
-                         str(civick.GVid.parse('2g061a0000y').convert(tiger.TigerGeoid).convert(civick.GVid)))
+        self.assertEqual('2g061a000y',
+                         str(civick.GVid.parse('2g061a000y').convert(tiger.TigerGeoid).convert(civick.GVid)))
 
     def test_convert(self):
         from geoid import tiger
@@ -58,8 +69,6 @@ class BasicTests(unittest.TestCase):
         from geoid import civick
 
         g = acs.Blockgroup(53, 33,1800,3)
-
-
 
         print str(g)
         cg = g.convert(civick)
@@ -72,7 +81,6 @@ class BasicTests(unittest.TestCase):
         cg = g.convert(civick.County)
 
         print str(cg)
-
 
     def test_promote(self):
         from geoid import tiger
@@ -128,16 +136,12 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('0a', str(civick.Us().summarize()))
         self.assertEqual('0a', str(civick.Us().allval()))
 
-
-
         print [ str(x) for x in  iallval(civick.Blockgroup(53, 33, 1800, 3))]
-
 
     def test_simplify(self):
 
         from geoid import acs
         from geoid.util import simplify, isimplify
-
 
         geoids = []
 
@@ -184,6 +188,8 @@ class BasicTests(unittest.TestCase):
 
         for k,v in summary_levels.items():
             print "<option value={}>{}</option>".format(str(civick.GVid.get_class(k)().summarize() ), k.capitalize())
+
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -19,10 +19,16 @@ class TigerGeoid(Geoid):
     width_pos = 1
     sl_format = ''
     elem_format = '{{{}:0{}d}}'
+    elem_str_format = '{{{}:s}}'
     sl_regex = ''
     elem_regex = '(?P<{}>.{{{}}})'
     encode = lambda x : int(x)
     decode = lambda x : int(x)
+
+    @classmethod
+    def part_width(cls, dec_width):
+        return dec_width
+
     @classmethod
     def class_factory(cls, name):
 
@@ -30,8 +36,6 @@ class TigerGeoid(Geoid):
             cls.__init__(self, *args, **kwargs)
 
         return type(name, (cls,), {"__init__": __init__})
-
-
 
 
 make_classes(TigerGeoid, sys.modules[__name__])

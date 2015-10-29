@@ -28,6 +28,7 @@ def simplify(geoids):
 
     compiled = set()
 
+
     for k, v in aggregated.items():
         if len(v) >= 5:
             compiled.add(k)
