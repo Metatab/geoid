@@ -23,6 +23,11 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('2g061a000y', str(civick.Tract(6, 72, 34)))
         self.assertEqual('2g061a000y', str(civick.Tract.parse('2g061a000y')))
 
+
+        gvid =  civick.State_sldl_county(2,10,10)
+
+        self.assertEqual(str(gvid), civick.GVid.parse(str(gvid)))
+
     def test_tiger(self):
         from geoid import tiger
 
@@ -63,8 +68,20 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('2g061a000y',
                          str(civick.GVid.parse('2g061a000y').convert(tiger.TigerGeoid).convert(civick.GVid)))
 
+    def test_string(self):
+
+        from geoid import acs
+        from geoid import civick
+
+        self.assertEqual('28300US020110R', str(acs.State_aianhh_aihhtli(2,110,u'R')))
+
+        self.assertEqual('invalid', str(civick.State_aianhh_aihhtli(2, 110, u'R')))
+
+        self.assertEqual('61000US011', str(acs.State_sldu(1,1)))
+
+        self.assertEqual('62000US09ZZZ', str(acs.State_sldl(9, 'ZZZ')))
+
     def test_convert(self):
-        from geoid import tiger
         from geoid import acs
         from geoid import civick
 
@@ -83,7 +100,7 @@ class BasicTests(unittest.TestCase):
         print str(cg)
 
     def test_promote(self):
-        from geoid import tiger
+
         from geoid import acs
         from geoid import civick
         from geoid.util import iallval

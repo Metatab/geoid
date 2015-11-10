@@ -2,7 +2,7 @@
 
 """
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __author__ = "eric@civicknowledge.com"
 
 names = { # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
@@ -121,7 +121,7 @@ lengths = {
     'sdelm': 5,  # State-School District (Elementary)
     'sdsec': 5,  # State-School District (Secondary)
     'sduni': 5,  # State-School District (Unified)
-    'sldl': 3,  # State Legislative District Lower
+    'sldl': "3",  # State Legislative District Lower
     'sldu': "3",  # State Legislative District Upper
     'state': 2,  # State (FIPS Code)
     'submcd': 5,  # Subminor Civil Division (FIPS)
@@ -432,7 +432,6 @@ class Geoid(object):
                     raise ValueError("Failed to convert '{}' ({}) for field '{}' in {}: {}"
                         .format(v, type(v), k, type(self), e))
 
-
     def __str__(self):
 
         d = self.__dict__
@@ -441,7 +440,7 @@ class Geoid(object):
         try:
             return self.fmt.format(**{ k:self.encode.__func__(v) for k,v in d.items() })
         except (ValueError, KeyError) as e:
-            raise ValueError("Bad value in {} for {}: {}".format(d, self.fmt, e))
+            raise ValueError("Bad value in {}, data {} for format {}: {}".format(type(self), d, self.fmt, e))
 
     def __hash__(self):
         return hash(str(self))
@@ -455,6 +454,9 @@ class Geoid(object):
         if not bool(gvid):
             return None
 
+        if not isinstance(gvid, basestring):
+            raise TypeError("Can't parse; not a string")
+
         try:
             if not cls.sl:
                 sl = cls.decode.__func__(gvid[0:cls.sl_width])  # Civick and ACS include the SL, so can call from base type.
@@ -464,7 +466,10 @@ class Geoid(object):
         except ValueError as e:
             raise ValueError("Failed to parse gvid '{}': {}".format(gvid, str(e)))
 
-        cls = cls.sl_map[sl]
+        try:
+            cls = cls.sl_map[sl]
+        except KeyError:
+            raise ValueError("Failed to parse gvid '{}': Unknown summary level '{}' ".format(gvid, sl))
 
         m = cls.regex.match(gvid)
 

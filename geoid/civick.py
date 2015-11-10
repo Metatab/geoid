@@ -17,7 +17,7 @@ class GVid(Geoid):
     sl_width = 2
     sl_format = '{sl:0>2s}'
     elem_format = '{{{}:0>{}s}}'
-    elem_str_format = '{{{}:s}}'
+    elem_str_format = '{{{}:0>{}s}}'
     sl_regex = '(?P<sl>.{2})'
     elem_regex = '(?P<{}>.{{{}}})'
 
@@ -44,6 +44,15 @@ class GVid(Geoid):
         s = str(self.allval())
 
         return self.parse(s[:2]+ ''.join(['Z']*len(s[2:])))
+
+    def __str__(self):
+        try:
+            return super(GVid, self).__str__()
+        except ValueError:
+            # There are a few types of geoids that can have strings in their values instead of numbers:
+            # aihhtli and sdlu
+            # FIXME: Do more analysis to determine if these values can be converted to numbers.
+            return 'invalid'
 
 
 make_classes(GVid, sys.modules[__name__])
