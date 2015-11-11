@@ -29,7 +29,7 @@ scripts=[ ]
 package_data = {"": ['*.html', '*.css', '*.rst']}
 
 requires = [
-
+    'six==1.9.0'
 ]
 
 classifiers = [
@@ -53,6 +53,8 @@ setup(
     package_data=package_data,
     scripts=scripts,
     install_requires=requires,
+    tests_require=['nose'],
+    test_suite='nose.collector',
     author=geoid.__author__,
     author_email='eric@civicknowledge',
     url='https://github.com/CivicKnowledge/geoid',
