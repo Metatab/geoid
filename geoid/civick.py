@@ -47,7 +47,9 @@ class GVid(Geoid):
 
     def __str__(self):
         try:
-            return super(GVid, self).__str__()
+            r = super(GVid, self).__str__()
+            assert r != '0' and r != 0
+            return r
         except ValueError:
             # There are a few types of geoids that can have strings in their values instead of numbers:
             # aihhtli and sdlu

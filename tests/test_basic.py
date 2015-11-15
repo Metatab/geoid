@@ -56,6 +56,8 @@ class BasicTests(unittest.TestCase):
         print(str(acs.AcsGeoid.parse('01000US')))
         print(str(acs.AcsGeoid.parse('61000US0200A')))
 
+        print(str(acs.AcsGeoid.parse('04000US02')))
+
     def test_parse(self):
         from geoid import tiger
         from geoid import civick
