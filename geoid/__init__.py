@@ -196,6 +196,7 @@ segments = {
     340: ['state', 'csa'],  # State-Combined Statistical Area
     341: ['state', 'csa', 'cbsa'],  # State-Combined Statistical Area-CBSA
     345: ['state', 'cnecta'],  # State-Combined New England City and Town Area
+
     346: ['state', 'cnecta', 'necta'],  # State-Combined New England City and Town Area-New England City and Town Area
     350: ['necta'],  # New England City and Town Area
     351: ['necta', 'state'],  # New England City and Town Area-State
@@ -455,6 +456,31 @@ class Geoid(object):
         except (ValueError, KeyError) as e:
             raise ValueError("Bad value in {}, data {} for format {}: {}".format(type(self), d, self.fmt, e))
 
+    @property
+    def state_name(self):
+        from censusnames import geo_names
+        return geo_names[(self.state, 0)]
+
+    @property
+    def county_name(self):
+        from censusnames import geo_names
+        return geo_names[(self.state, self.county)]
+
+    @property
+    def geo_name(self):
+
+        if self.level == 'county':
+            return self.county_name
+        elif self.level == 'state':
+            return self.state_name
+        else:
+            if hasattr(self, 'county'):
+                return "{} in {}".format(self.level,self.county_name)
+            elif hasattr(sef, 'state'):
+                return "{} in {}".format(self.level, self.state_name)
+            else:
+                return "a {}".format(self.level)
+
     def __hash__(self):
         return hash(str(self))
 
@@ -631,3 +657,30 @@ def generate_all(sumlevel, d):
         )
     except:
         raise
+
+
+def _generate_names():
+    """Ambry code to generate the state and county names
+
+    >>> python -c 'import geoid; geoid._generate_names()'
+
+    """
+
+    from ambry import get_library
+
+    l = get_library()
+
+    counties = l.partition('census.gov-acs-geofile-2009-geofile50-20095-50')
+    states = l.partition('census.gov-acs-geofile-2009-geofile40-20095-40')
+
+    names = {}
+    for row in counties.remote_datafile.reader:
+        names[(row.state, row.county)] = row.name
+
+    for row in states.remote_datafile.reader:
+        if row.component == '00':
+            names[(row.state, 0)] = row.name
+
+    import pprint
+
+    pprint.pprint(names)
