@@ -86,6 +86,9 @@ names = {  # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
     'state_necta_nectadiv': 364,
     'state_necta_nectadiv_county': 365,
     'state_necta_nectadiv_county_cousub': 366,
+    'ua': 400,
+    'ua_state': 410,
+    'ua_state_county': 430,
     'state_sldu_county': 612,
     'state_cdcurr': 500,
     'state_cdcurr_county': 510,
@@ -216,7 +219,10 @@ segments = {
     365: ['state', 'necta', 'nectadiv', 'county'],  # State-New England City and Town Area (NECTA)-NECTA Division-County
     366: ['state', 'necta', 'nectadiv', 'county', 'cousub'],
     # State-New England City and Town Area (NECTA)-NECTA Division-County-County Subdivision
-    400: ['ua'],  # Urban Area
+    400: ['ua'],  # Urban Area,
+    410: ['ua', 'state'],  # Urban Area, State,
+    430: ['ua','state','county'],  # Urban Area, State, County,
+
     500: ['state', 'cdcurr'],  # Congressional District
     510: ['state', 'cdcurr', 'county'],  #
     550: ['state', 'cdcurr', 'aianhh'],
@@ -471,13 +477,17 @@ class Geoid(object):
 
         if self.level == 'county':
             return self.county_name
+
         elif self.level == 'state':
             return self.state_name
+
         else:
             if hasattr(self, 'county'):
                 return "{} in {}".format(self.level,self.county_name)
+
             elif hasattr(sef, 'state'):
                 return "{} in {}".format(self.level, self.state_name)
+
             else:
                 return "a {}".format(self.level)
 
