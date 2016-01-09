@@ -107,7 +107,7 @@ names = {  # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
 
 lengths = {
     'aianhh': 4,  # American Indian Area/Alaska Native Area/ Hawaiian Home Land (Census)
-    'aihhtli': '1',  # American Indian Trust Land/ Hawaiian Home Land Indicator
+    'aihhtli': '1',  # American Indian Trust Land/ Hawaiian Home Land Indicator. A str b/c Census val is a str
     'aitsce': 3,  # American Indian Tribal Subdivision (Census)
     'anrc': 5,  # Alaska Native Regional Corporation (FIPS)
     'blkgrp': 1,  # Block Group
@@ -131,8 +131,8 @@ lengths = {
     'sdelm': 5,  # State-School District (Elementary)
     'sdsec': 5,  # State-School District (Secondary)
     'sduni': 5,  # State-School District (Unified)
-    'sldl': '3',  # State Legislative District Lower
-    'sldu': '3',  # State Legislative District Upper
+    'sldl': '3',  # State Legislative District Lower. A String to signal that the census value is a string
+    'sldu': '3',  # State Legislative District Upper.  A String to signal that the census value is a string
     'state': 2,  # State (FIPS Code)
     'submcd': 5,  # Subminor Civil Division (FIPS)
     'tract': 6,  # Census Tract

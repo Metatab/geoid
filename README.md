@@ -69,6 +69,10 @@ Convert: Change the type, for instance from a Census geoid to an ACS geoid
 Summarize: Create a value to represent a summary level
 AllVal: Create a value to represent coverage of an entire region
 
+Caveats
+-------
+
+The geoids don't preserve the component, so, for instance,  '03001US1' will get changed to '03000US1'
 
 
 ### Running tests

@@ -48,15 +48,14 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(str(acs.Blockgroup(53, 33, 1800, 3)), str(acs.AcsGeoid.parse('15000US530330018003')))
 
         # Just test that the parsing doesn't throw an exception
-        print(str(acs.AcsGeoid.parse('07000US020130159801090')))
-        print(str(acs.AcsGeoid.parse('03001US1')))
-        print(str(acs.AcsGeoid.parse('030A0US1')))
-        print(str(acs.AcsGeoid.parse('28300US020110R')))
-        print(str(acs.AcsGeoid.parse('79500US0400101')))
-        print(str(acs.AcsGeoid.parse('01000US')))
-        print(str(acs.AcsGeoid.parse('61000US0200A')))
 
-        print(str(acs.AcsGeoid.parse('04000US02')))
+        for test_val in ['07000US020130159801090', '28300US020110R','79500US0400101',
+                          '01000US','61000US0200A','04000US02','61200US0200T185']:
+            self.assertEqual(test_val, str(acs.AcsGeoid.parse(test_val)))
+
+        # These vals get changed a bit, usually by removing the component value
+        for test_val_in, test_val_out in [('03001US1', '03000US1'), ('030A0US1', '03000US1')]:
+            self.assertEqual(test_val_out, str(acs.AcsGeoid.parse(test_val_in)))
 
     def test_parse(self):
         from geoid import tiger
