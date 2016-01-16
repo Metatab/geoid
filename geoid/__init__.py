@@ -2,7 +2,7 @@
 
 """
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 __author__ = 'eric@civicknowledge.com'
 
 import inspect
@@ -27,15 +27,17 @@ names = {  # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
     'sduni': 970,
     'zcta': 860,
     'zip': 1200,
+    'sldl': 620,
+    'sldu': 610,
+    'cdcurr': 500,
 
-    # Other Levels that don't have proper names yet.
+    # Other Levels that don't have proper names yet. For these .allval() and
+    # simplify() don't work properly.
     'state_aianhh': 260,
     'necta_nectadiv_state_county_cousub': 358,
-    'state_sldl': 620,
     'state_aianhh_place': 269,
     'aianhh_state_county': 270,
     'state_cbsa_metdiv': 323,
-    'state_sldu': 610,
     'state_aianhh280': 280,
     'state_place_county': 155,
     'aianhh_aitsce_state': 290,
@@ -86,11 +88,11 @@ names = {  # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
     'state_necta_nectadiv': 364,
     'state_necta_nectadiv_county': 365,
     'state_necta_nectadiv_county_cousub': 366,
-    'ua': 400,
+
     'ua_state': 410,
     'ua_state_county': 430,
     'state_sldu_county': 612,
-    'state_cdcurr': 500,
+
     'state_cdcurr_county': 510,
     'state_necta_place': 361,
     'aianhh': 250,

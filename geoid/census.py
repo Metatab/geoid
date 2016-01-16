@@ -16,7 +16,7 @@ class CensusGeoid(Geoid):
 
     sl_format = '' # The '00' bit is for the geo component, always 00 in our use.
     elem_format =     '{{{}:0{}d}}'
-    elem_str_format = '{{{}:s}}'
+    elem_str_format = '{{{}:}}'
     sl_regex = ''
     elem_regex = '(?P<{}>.{{{}}})'
     encode = lambda x: int(x)
