@@ -244,7 +244,8 @@ segments = {
 
 plurals = {
     'county': 'counties',
-    'place': 'places'
+    'place': 'places',
+    'Sdlu': 'State '
 }
 
 

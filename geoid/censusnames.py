@@ -1,4 +1,6 @@
-geo_names={(1, 0): u'Alabama',
+geo_names={
+ (0, 0): u'US',
+ (1, 0): u'Alabama',
  (1, 1): u'Autauga County, Alabama',
  (1, 3): u'Baldwin County, Alabama',
  (1, 5): u'Barbour County, Alabama',
