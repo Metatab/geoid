@@ -473,11 +473,23 @@ class Geoid(object):
     @property
     def county_name(self):
         from censusnames import geo_names
-        return geo_names[(self.state, self.county)]
+        try:
+            return geo_names[(self.state, self.county)]
+        except KeyError:
+            try:
+                return ("County #{}, {}".format(self.county,geo_names[(self.state, 0)]))
+            except KeyError:
+                return ("County #{}, State#{}".format(self.county, self.state))
+
 
     @property
     def geo_name(self):
+        """
+        Return a name of the state or county, or, for other lowever levels, the
+        name of the level type in the county.
 
+        :return:
+        """
         if self.level == 'county':
             return self.county_name
 
@@ -488,7 +500,7 @@ class Geoid(object):
             if hasattr(self, 'county'):
                 return "{} in {}".format(self.level,self.county_name)
 
-            elif hasattr(sef, 'state'):
+            elif hasattr(self, 'state'):
                 return "{} in {}".format(self.level, self.state_name)
 
             else:
@@ -601,6 +613,20 @@ class Geoid(object):
         d[self.level] = 0
 
         cls = self.get_class(self.sl)
+
+        return cls(**d)
+
+    @classmethod
+    def nullval(cls):
+        """Create a new instance where all of the values are 0"""
+
+        d = dict(cls.__dict__.items())
+
+        for k in d:
+            d[k] = 0
+
+        d['sl'] = cls.sl
+        d[cls.level] = 0
 
         return cls(**d)
 
