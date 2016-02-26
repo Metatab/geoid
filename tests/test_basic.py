@@ -51,11 +51,14 @@ class BasicTests(unittest.TestCase):
 
         for test_val in ['07000US020130159801090', '28300US020110R','79500US0400101',
                           '01000US','61000US0200A','04000US02','61200US0200T185']:
+
             self.assertEqual(test_val, str(acs.AcsGeoid.parse(test_val)))
 
         # These vals get changed a bit, usually by removing the component value
         for test_val_in, test_val_out in [('03001US1', '03000US1'), ('030A0US1', '03000US1')]:
             self.assertEqual(test_val_out, str(acs.AcsGeoid.parse(test_val_in)))
+
+        self.assertEqual('61000US151',str(acs.Sldu(15, 1)))
 
     def test_parse(self):
         from geoid import tiger
@@ -71,6 +74,10 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(
             '2g061a000y',
             str(civick.GVid.parse('2g061a000y').convert(tiger.TigerGeoid).convert(civick.GVid)))
+
+        self.assertEquals(str('010'), str(civick.GVid.get_class('null')(0)))
+
+        print civick.GVid.parse('foobar', exception=False)
 
     def test_string(self):
 

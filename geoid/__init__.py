@@ -7,10 +7,12 @@ __author__ = 'eric@civicknowledge.com'
 
 import inspect
 import sys
+import re
 
 import six
 
 names = {  # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
+    'null': 1,
     'us': 10,
     'region': 20,
     'division': 30,
@@ -108,6 +110,7 @@ names = {  # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
 # Note: It's ok to keep string as value - is such case string template will be used instead of int template.
 
 lengths = {
+    'null': 1,
     'aianhh': 4,  # American Indian Area/Alaska Native Area/ Hawaiian Home Land (Census)
     'aihhtli': '1',  # American Indian Trust Land/ Hawaiian Home Land Indicator. A str b/c Census val is a str
     'aitsce': 3,  # American Indian Tribal Subdivision (Census)
@@ -147,6 +150,7 @@ lengths = {
 }
 
 segments = {
+    1: ['null'],  # United States
     10: ['us'],  # United States
     20: ['region'],  # Region
     30: ['division'],  # Division
@@ -345,6 +349,68 @@ def make_classes(base_class, module):
 
     setattr(module, 'get_class', partial(get_class, module))
 
+class CountyName(object):
+    """A Census county name, with methods to create shorter versions and return the types of division,
+    which may be county, parish, borough, etc. """
+
+    # Strip the county and state name. THis doesn't work for some locations
+    # where the county is actually called a parish or a bario.
+
+    state_name_pattern = r', (.*)$'
+    state_name_re = re.compile(state_name_pattern)
+
+    def __init__(self, name):
+        self.name = name
+
+    def intuit_name(self, name):
+        """Return a numeric value in the range [-1,1), indicating the likelyhood that the name is for a valuable of
+        of this type. -1 indicates a strong non-match, 1 indicates a strong match, and 0 indicates uncertainty. """
+
+        raise NotImplementedError
+
+    @property
+    def state(self):
+        try:
+            county, state = self.name.split(',')
+            return state
+        except ValueError:
+            # The search will fail for 'District of Columbia'
+            return ''
+
+    @property
+    def medium_name(self):
+        """The census name without the state"""
+        return self.state_name_re.sub('', self.name)
+
+    type_names = (
+        'County', 'Municipio', 'Parish', 'Census Area', 'Borough',
+        'Municipality', 'city', 'City and Borough')
+    type_name_pattern = '|'.join('({})'.format(e) for e in type_names)
+    type_names_re = re.compile(type_name_pattern)
+
+    @property
+    def division_name(self):
+        """The type designation for the county or county equivalent, such as 'County','Parish' or 'Borough'"""
+        try:
+            return next(e for e in self.type_names_re.search(self.name).groups() if e is not None)
+        except AttributeError:
+            # The search will fail for 'District of Columbia'
+            return ''
+
+    county_name_pattern = r'(.+) {}, (.+)'.format(type_name_pattern)
+    county_name_re = re.compile(county_name_pattern)
+
+    @property
+    def short_name(self):
+        try:
+            county, state = self.name.split(',')
+        except ValueError:
+            return self.name  # 'District of Colombia'
+
+        return self.type_names_re.sub('', county)
+
+    def __str__(self):
+        return self.name
 
 class Geoid(object):
 
@@ -419,6 +485,7 @@ class Geoid(object):
         cls.level = level_name
         cls.fields = segments[cls.sl]
 
+
     @classmethod
     def get_class(cls, name_or_sl):
         """Return a derived class based on the class name or the summary_level"""
@@ -458,6 +525,13 @@ class Geoid(object):
         d = self.__dict__
         d['sl'] = self.sl
 
+        # Hacks for special string cases
+        if 'sldu' in d:
+            d['sldu'] = str(d['sldu']).zfill(3)
+
+        if 'sldl' in d:
+            d['sldl'] = str(d['sldl']).zfill(3)
+
         try:
             fn = six.get_method_function(self.encode)
             kwargs = {k: fn(v) for k, v in d.items()}
@@ -474,13 +548,12 @@ class Geoid(object):
     def county_name(self):
         from censusnames import geo_names
         try:
-            return geo_names[(self.state, self.county)]
+            return CountyName(geo_names[(self.state, self.county)])
         except KeyError:
             try:
                 return ("County #{}, {}".format(self.county,geo_names[(self.state, 0)]))
             except KeyError:
                 return ("County #{}, State#{}".format(self.county, self.state))
-
 
     @property
     def geo_name(self):
@@ -513,7 +586,18 @@ class Geoid(object):
         return cmp(str(self), str(other))
 
     @classmethod
-    def parse(cls, gvid):
+    def parse(cls, gvid, exception=True):
+        """
+        Parse a string value into the geoid of this class.
+
+        :param gvid: String value to parse.
+        :param exception: If true ( default) raise an eception on parse erorrs. If False, return a
+        'null' geoid.
+        :return:
+        """
+
+        if gvid == 'invalid':
+            return cls.get_class('null')(0)
 
         if not bool(gvid):
             return None
@@ -532,13 +616,20 @@ class Geoid(object):
                 sl = fn(gvid[0:cls.sl_width])
             else:
                 sl = cls.sl  # Otherwise must use derived class.
+
         except ValueError as e:
-            raise ValueError("Failed to parse gvid '{}': {}".format(gvid, str(e)))
+            if exception:
+                raise ValueError("Failed to parse gvid '{}': {}".format(gvid, str(e)))
+            else:
+                return cls.get_class('null')(0)
 
         try:
             cls = cls.sl_map[sl]
         except KeyError:
-            raise ValueError("Failed to parse gvid '{}': Unknown summary level '{}' ".format(gvid, sl))
+            if exception:
+                raise ValueError("Failed to parse gvid '{}': Unknown summary level '{}' ".format(gvid, sl))
+            else:
+                return cls.get_class('null')(0)
 
         m = cls.regex.match(gvid)
 
@@ -554,6 +645,7 @@ class Geoid(object):
             fn = cls.decode
         else:
             fn = cls.decode.__func__
+
         d = {k: fn(v) for k, v in d.items()}
 
         try:
@@ -653,7 +745,6 @@ class Geoid(object):
     def level_plural(self):
         """Return the name of the level as a plural"""
         return plurals.get(self.level, self.level + "s")
-
 
 def generate_all(sumlevel, d):
     """Generate a dict that includes all of the available geoid values, with keys
