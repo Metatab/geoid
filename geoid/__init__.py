@@ -323,7 +323,7 @@ def augment(module_name, base_class):
 def get_class(module, sl):
 
     for name, named_sl in names.items():
-        if named_sl == sl:
+        if named_sl == sl or sl == name:
             return getattr(module, name.capitalize())
 
     raise NotASummaryName("No class for summary_level {}".format(sl))
@@ -551,9 +551,9 @@ class Geoid(object):
             return CountyName(geo_names[(self.state, self.county)])
         except KeyError:
             try:
-                return ("County #{}, {}".format(self.county,geo_names[(self.state, 0)]))
+                return CountyName("County #{}, {}".format(self.county,geo_names[(self.state, 0)]))
             except KeyError:
-                return ("County #{}, State#{}".format(self.county, self.state))
+                return CountyName("County #{}, State#{}".format(self.county, self.state))
 
     @property
     def geo_name(self):
@@ -564,14 +564,14 @@ class Geoid(object):
         :return:
         """
         if self.level == 'county':
-            return self.county_name
+            return str(self.county_name)
 
         elif self.level == 'state':
             return self.state_name
 
         else:
             if hasattr(self, 'county'):
-                return "{} in {}".format(self.level,self.county_name)
+                return "{} in {}".format(self.level,str(self.county_name))
 
             elif hasattr(self, 'state'):
                 return "{} in {}".format(self.level, self.state_name)
@@ -602,8 +602,9 @@ class Geoid(object):
         if not bool(gvid):
             return None
 
+
         if not isinstance(gvid, basestring):
-            raise TypeError("Can't parse; not a string")
+            raise TypeError("Can't parse; not a string. Got a '{}' ".format(type(gvid)))
 
         try:
             if not cls.sl:
