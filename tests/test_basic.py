@@ -61,8 +61,8 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('61000US151',str(acs.Sldu(15, 1)))
 
     def test_parse(self):
-        from geoid import tiger
-        from geoid import civick
+        from geoid import tiger, acs, civick
+        from geoid import parse_to_gvid
 
         self.assertEqual(tiger.County, tiger.TigerGeoid.get_class('county'))
         self.assertEqual(tiger.County, tiger.TigerGeoid.get_class(50))
@@ -77,18 +77,34 @@ class BasicTests(unittest.TestCase):
 
         self.assertEquals(str('010'), str(civick.GVid.get_class('null')(0)))
 
-        print civick.GVid.parse('foobar', exception=False)
+        self.assertEqual('010',civick.GVid.parse('foobar', exception=False))
+
+        self.assertEqual('0O0R09', str(parse_to_gvid(str(civick.County(53, 9)))))
+        self.assertEqual('2q0R0x00t23', str(parse_to_gvid(str(civick.Blockgroup(53, 33, 1800, 3)))))
+
+        self.assertEqual('0O0R09', str(parse_to_gvid(str(acs.County(53, 9)))))
+        self.assertEqual('2q0R0x00t23', str(parse_to_gvid(str(acs.Blockgroup(53, 33, 1800, 3)))))
+
+        with self.assertRaises(ValueError):
+            self.assertEqual('0O0R09', str(parse_to_gvid('foobarity')))
 
     def test_string(self):
 
         from geoid import acs
         from geoid import civick
 
+
         self.assertEqual('28300US020110R', str(acs.State_aianhh_aihhtli(2,110,u'R')))
 
         self.assertEqual('invalid', str(civick.State_aianhh_aihhtli(2, 110, u'R')))
 
-        self.assertEqual('61000US011', str(acs.State_sldu(1,1)))
+        self.assertEqual('61000US01001', str(acs.State_sldu(1,1)))
+
+        self.assertEqual('61000US08005', str(acs.State_sldu(8, 5)))
+
+        self.assertEqual('61000US50WSR', str(acs.State_sldu(50, 'WSR')))
+
+        self.assertEqual('61200US08001115', str(acs.State_sldu_county(8,1,115)))
 
         self.assertEqual('62000US09ZZZ', str(acs.State_sldl(9, 'ZZZ')))
 

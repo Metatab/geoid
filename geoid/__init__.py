@@ -2,7 +2,7 @@
 
 """
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 __author__ = 'eric@civicknowledge.com'
 
 import inspect
@@ -90,11 +90,12 @@ names = {  # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
     'state_necta_nectadiv': 364,
     'state_necta_nectadiv_county': 365,
     'state_necta_nectadiv_county_cousub': 366,
-
     'ua_state': 410,
     'ua_state_county': 430,
     'state_sldu_county': 612,
-
+    'state_sldu': 610,
+    'state_sldl_county': 622,
+    'state_sldl': 620,
     'state_cdcurr_county': 510,
     'state_necta_place': 361,
     'aianhh': 250,
@@ -246,6 +247,94 @@ segments = {
     1200: ['zip']
 }
 
+# TODO: The descriptions should be combined with names and segments into a single dict with access
+# functions, but I don't want to break anything right now.
+descriptions = {
+    1: 'United States',
+    10: 'United States',
+    20: 'Region',
+    30: 'Division',
+    40: 'State',
+    50: 'County',
+    60: 'County Subdivision',
+    67: 'State (Puerto Rico Only)-County-County Subdivision-Subbarrio',
+    70: 'County Subdivision-Place/Remainder',
+    80: 'County Subdivision-Place/Remainder-Census Tract',
+    101: 'block',
+    140: 'Census Tract',
+    150: 'Census Tract-Block Group',
+    155: 'Place-County',
+    160: 'Place',
+    170: 'Consolidated City',
+    172: 'Consolidated City-Place Within Consolidated City',
+    230: 'State-Alaska Native Regional Corporation',
+    250: 'American Indian Area/Alaska Native Area/Hawaiian Home Land',
+    251: 'American Indian Area/Alaska NativeArea/HawaiianHomeLand-Tribal Subdivision/Remainder',
+    252: 'American Indian Area/Alaska Native Area (Reservation or Statistical Entity Only)',
+    254: 'American Indian Area (Off-Reservation Trust Land Only)/Hawaiian Home Land',
+    260: 'American Indian Area/Alaska Native Area/Hawaiian Home Land-State',
+    269: 'American Indian Area/Alaska Native Area/Hawaiian Home Land-Place-Remainder',
+    270: 'American Indian Area/Alaska Native Area/Hawaiian Home Land-State-County',
+    280: 'State-American Indian Area/Alaska Native Area/Hawaiian Home Land',
+    283: 'aihhtli',
+    286: 'aihhtli',
+    290: 'state',
+    310: 'CBSA',
+    311: 'CBSA-State-County',
+    312: 'CBSA-State-Principal City',
+    313: 'CBSA-State-County',
+    314: 'Metropolitan Statistical Area/Metropolitan Division',
+    315: 'Metropolitan Statistical Area/Metropolitan Division-State',
+    316: 'Metropolitan Statistical Area/Metropolitan Division-State-County',
+    320: 'State- CBSA',
+    321: 'State- CBSA -Principal City',
+    322: 'State- CBSA -County',
+    323: 'State- Metropolitan Statistical Area/Metropolitan Division',
+    324: 'State- Metropolitan Statistical Area/Metropolitan Division-County',
+    330: 'Combined Statistical Area',
+    331: 'Combined Statistical Area-State',
+    332: 'Combined Statistical Area-CBSA',
+    333: 'Combined Statistical Area-CBSA-State',
+    335: 'Combined New England City and Town Area',
+    336: 'Combined New England City and Town Area -State',
+    337: 'Combined New England City and Town Area -New England City and Town Area',
+    338: 'Combined New England City and Town Area -New England City and Town Area-State',
+    340: 'State-Combined Statistical Area',
+    341: 'State-Combined Statistical Area-CBSA',
+    345: 'State-Combined New England City and Town Area',
+    346: 'State-Combined New England City and Town Area-New England City and Town Area',
+    350: 'New England City and Town Area',
+    351: 'New England City and Town Area-State',
+    352: 'New England City and Town Area-State-Principal City',
+    353: 'New England City and Town Area-State-County',
+    354: 'New England City and Town Area-State-County-County Subdivision',
+    355: 'New England City and Town Area (NECTA)-NECTA Division',
+    356: 'New England City and Town Area (NECTA)-NECTA Division-State',
+    357: 'New England City and Town Area (NECTA)-NECTA Division-State-County',
+    358: 'New England City and Town Area (NECTA)-NECTA Division-State-County-County Subdivision',
+    360: 'State-New England City and Town Area',
+    361: 'State-New England City and Town Area-Principal City',
+    362: 'State-New England City and Town Area-County',
+    363: 'State-New England City and Town Area-County-County Subdivision',
+    364: 'State-New England City and Town Area (NECTA)-NECTA Division',
+    365: 'State-New England City and Town Area (NECTA)-NECTA Division-County-County Subdivision',
+    400: 'Urban Area,',
+    410: 'Urban Area, State,',
+    430: 'Urban Area, State, County,',
+    500: 'Congressional District',
+    510: 'Congressional District, County',
+    550: 'Congressional District-American IndianArea/Alaska NativeArea/Hawaiian Home Land',
+    610: 'State Senate District',
+    612: 'State Senate District-County',
+    620: 'State House District',
+    622: 'State House District-County',
+    795: 'State-Public Use MicroSample Area 5%',
+    860: 'ZIP Code Tabulation Area',
+    950: 'State-Elementary School District',
+    960: 'State-High School District',
+    970: 'State-Unified School District',
+}
+
 plurals = {
     'county': 'counties',
     'place': 'places',
@@ -260,6 +349,23 @@ class NotASummaryName(Exception):
 class ParseError(Exception):
     """Error parsing a geoid"""
 
+
+def parse_to_gvid(v):
+    """Parse an ACS Geoid or a GVID to a GVID"""
+    from geoid.civick import GVid
+    from geoid.acs import AcsGeoid
+
+    m1 = ''
+
+    try:
+        return GVid.parse(v)
+    except ValueError as e:
+        m1 = e.message
+
+    try:
+        return AcsGeoid.parse(v).convert(GVid)
+    except ValueError as e:
+        raise ValueError("Failed to parse to either ACS or GVid: {}; {}".format(m1, e.message))
 
 def base62_encode(num):
     """Encode a number in Base X. WIth the built-in alphabet, its base 62
@@ -548,12 +654,15 @@ class Geoid(object):
     def county_name(self):
         from censusnames import geo_names
         try:
-            return CountyName(geo_names[(self.state, self.county)])
-        except KeyError:
             try:
-                return CountyName("County #{}, {}".format(self.county,geo_names[(self.state, 0)]))
+                return CountyName(geo_names[(self.state, self.county)])
             except KeyError:
-                return CountyName("County #{}, State#{}".format(self.county, self.state))
+                try:
+                    return CountyName("County #{}, {}".format(self.county,geo_names[(self.state, 0)]))
+                except KeyError:
+                    return CountyName("County #{}, State#{}".format(self.county, self.state))
+        except Exception:
+            return CountyName('')
 
     @property
     def geo_name(self):
@@ -811,7 +920,5 @@ def _generate_names():
     for row in states.remote_datafile.reader:
         if row.component == '00':
             names[(row.state, 0)] = row.name
-
-    import pprint
 
     pprint.pprint(names)

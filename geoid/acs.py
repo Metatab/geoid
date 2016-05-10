@@ -20,7 +20,7 @@ class AcsGeoid(Geoid):
 
     sl_format = '{sl:0>3d}00US'
     elem_format = '{{{}:0{}d}}'
-    elem_str_format = '{{{}}}'
+    elem_str_format = '{{{}:0>{}}}'
     sl_regex = '(?P<sl>.{3})..US'
     elem_regex = '(?P<{}>.{{{}}})'
     encode = mostly_int
