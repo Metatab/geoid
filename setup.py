@@ -11,7 +11,7 @@ except ImportError:
 
 # Avoiding import so we don't execute ambry.__init__.py, which has imports
 # that aren't installed until after installation.
-meta = imp.load_source('_meta', 'ambry/_meta.py')
+meta = imp.load_source('_meta', 'geoid/_meta.py')
 
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
