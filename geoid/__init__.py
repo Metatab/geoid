@@ -651,6 +651,11 @@ class Geoid(object):
         return geo_names[(self.state, 0)]
 
     @property
+    def stusab(self):
+        from censusnames import stusab
+        return stusab.get(self.state)
+
+    @property
     def county_name(self):
         from censusnames import geo_names
         try:

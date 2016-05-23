@@ -29,7 +29,7 @@ scripts=[ ]
 package_data = {"": ['*.html', '*.css', '*.rst']}
 
 requires = [
-    'six==1.9.0'
+    'six'
 ]
 
 classifiers = [
