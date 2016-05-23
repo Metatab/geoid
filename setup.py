@@ -3,13 +3,15 @@
 
 import os
 import sys
-
+import imp
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
-from geoid._meta import __version__, __author__
+# Avoiding import so we don't execute ambry.__init__.py, which has imports
+# that aren't installed until after installation.
+meta = imp.load_source('_meta', 'ambry/_meta.py')
 
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
@@ -45,7 +47,7 @@ classifiers = [
 
 setup(
     name='geoid',
-    version=__version__,
+    version=meta.__version__,
     description='Classes for working with US Census geoids',
     long_description=readme,
     packages=packages,
@@ -54,7 +56,7 @@ setup(
     install_requires=requires,
     tests_require=['nose'],
     test_suite='nose.collector',
-    author=__author__,
+    author=meta.__author__,
     author_email='eric@civicknowledge',
     url='https://github.com/CivicKnowledge/geoid',
     license='LICENSE',
