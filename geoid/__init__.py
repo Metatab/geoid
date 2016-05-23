@@ -2,8 +2,8 @@
 
 """
 
-__version__ = '0.1.6'
-__author__ = 'eric@civicknowledge.com'
+from _meta import *
+
 
 import inspect
 import sys

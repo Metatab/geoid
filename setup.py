@@ -9,8 +9,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-import geoid
-
+from geoid._meta import __version__, __author__
 
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
@@ -46,7 +45,7 @@ classifiers = [
 
 setup(
     name='geoid',
-    version=geoid.__version__,
+    version=__version__,
     description='Classes for working with US Census geoids',
     long_description=readme,
     packages=packages,
@@ -55,7 +54,7 @@ setup(
     install_requires=requires,
     tests_require=['nose'],
     test_suite='nose.collector',
-    author=geoid.__author__,
+    author=__author__,
     author_email='eric@civicknowledge',
     url='https://github.com/CivicKnowledge/geoid',
     license='LICENSE',
