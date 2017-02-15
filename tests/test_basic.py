@@ -26,7 +26,7 @@ class BasicTests(unittest.TestCase):
 
         gvid =  civick.State_sldl_county(2,10,10)
 
-        self.assertEqual(str(gvid), civick.GVid.parse(str(gvid)))
+        self.assertEqual(str(gvid), str(civick.GVid.parse(str(gvid))))
 
     def test_tiger(self):
         from geoid import tiger
@@ -58,11 +58,11 @@ class BasicTests(unittest.TestCase):
         for test_val_in, test_val_out in [('03001US1', '03000US1'), ('030A0US1', '03000US1')]:
             self.assertEqual(test_val_out, str(acs.AcsGeoid.parse(test_val_in)))
 
-        self.assertEqual('61000US151',str(acs.Sldu(15, 1)))
+        self.assertEqual('61000US15001',str(acs.Sldu(15, 1)))
 
     def test_parse(self):
         from geoid import tiger, acs, civick
-        from geoid import parse_to_gvid
+        from geoid.core import parse_to_gvid
 
         self.assertEqual(tiger.County, tiger.TigerGeoid.get_class('county'))
         self.assertEqual(tiger.County, tiger.TigerGeoid.get_class(50))
@@ -77,7 +77,7 @@ class BasicTests(unittest.TestCase):
 
         self.assertEquals(str('010'), str(civick.GVid.get_class('null')(0)))
 
-        self.assertEqual('010',civick.GVid.parse('foobar', exception=False))
+        self.assertEqual('010',str(civick.GVid.parse('foobar', exception=False)))
 
         self.assertEqual('0O0R09', str(parse_to_gvid(str(civick.County(53, 9)))))
         self.assertEqual('2q0R0x00t23', str(parse_to_gvid(str(civick.Blockgroup(53, 33, 1800, 3)))))
