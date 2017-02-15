@@ -4,6 +4,7 @@
 import os
 import sys
 import imp
+
 try:
     from setuptools import setup
 except ImportError:
@@ -29,9 +30,7 @@ scripts=[ ]
 
 package_data = {"": ['*.html', '*.css', '*.rst']}
 
-requires = [
-    'six'
-]
+
 
 classifiers = [
         'Development Status :: 2 - Pre-Alpha',
@@ -53,7 +52,7 @@ setup(
     packages=packages,
     package_data=package_data,
     scripts=scripts,
-    install_requires=requires,
+    install_requires=['six'],
     tests_require=['nose'],
     test_suite='nose.collector',
     author=meta.__author__,
