@@ -61,8 +61,7 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('61000US15001',str(acs.Sldu(15, 1)))
 
     def test_parse(self):
-        from geoid import tiger, acs, civick
-        from geoid.core import parse_to_gvid
+        from geoid import tiger, acs, civick, parse_to_gvid
 
         self.assertEqual(tiger.County, tiger.TigerGeoid.get_class('county'))
         self.assertEqual(tiger.County, tiger.TigerGeoid.get_class(50))
