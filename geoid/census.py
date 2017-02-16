@@ -1,7 +1,7 @@
 """Geoids for the decenial census"""
 
 from . import base62_decode, Geoid, make_classes
-from geoid.geoid.core import base62_encode, base62_decode, make_classes, Geoid
+from .core import base62_encode, base62_decode, make_classes, Geoid
 import sys
 
 class CensusGeoid(Geoid):
