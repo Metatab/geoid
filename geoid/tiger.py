@@ -3,7 +3,6 @@ Classes for working with the geoids as they appear in the Tiger files, which omi
 the "us" string in the ACS form, usually starting with the state. 
 """
 
-from . import base62_decode, Geoid, make_classes
 from .core import base62_encode, base62_decode, make_classes, Geoid
 import sys
 

@@ -38,7 +38,7 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('999999999999999', str(tiger.Block.parse('999999999999999')))
 
     def test_acs(self):
-        from geoid import acs
+        import geoid.acs as acs
 
         self.assertEqual(str(acs.State(53)), str(acs.AcsGeoid.parse('04000US53')))
         self.assertEqual(str(acs.County(53, 9)), str(acs.AcsGeoid.parse('05000US53009')))
@@ -61,7 +61,8 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('61000US15001',str(acs.Sldu(15, 1)))
 
     def test_parse(self):
-        from geoid import tiger, acs, civick, parse_to_gvid
+        from geoid import tiger, acs, civick
+        from geoid.core import parse_to_gvid
 
         self.assertEqual(tiger.County, tiger.TigerGeoid.get_class('county'))
         self.assertEqual(tiger.County, tiger.TigerGeoid.get_class(50))
@@ -88,6 +89,9 @@ class BasicTests(unittest.TestCase):
             self.assertEqual('0O0R09', str(parse_to_gvid('foobarity')))
 
     def test_string(self):
+
+        import geoid
+        print(geoid.__file__)
 
         from geoid import acs
         from geoid import civick
