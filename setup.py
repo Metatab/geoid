@@ -56,7 +56,7 @@ setup(
     tests_require=['nose'],
     test_suite='nose.collector',
     author=meta.__author__,
-    author_email='eric@civicknowledge',
+    author_email='eric@civicknowledge.com',
     url='https://github.com/CivicKnowledge/geoid',
     license='LICENSE',
     classifiers=classifiers,
