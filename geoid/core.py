@@ -428,7 +428,7 @@ def get_class(module, sl):
 def make_classes(base_class, module):
     """Create derived classes and put them into the same module as the base class.
 
-    This function is called at the end of each of the derived calss modules, acs, census, civik and tiger.
+    This function is called at the end of each of the derived class modules, acs, census, civik and tiger.
     It will create a set of new derived class in the module, one for  each of the enries in the `summary_levels`
     dict.
 
@@ -508,7 +508,6 @@ class CountyName(object):
 
     def __str__(self):
         return self.name
-
 
 class Geoid(object):
 
@@ -600,7 +599,7 @@ class Geoid(object):
 
     def __init__(self, *args, **kwargs):
 
-        # This is a bit unusual, because it means, that , unlike nornal
+        # This is a bit unusual, because it means, that , unlike normal
         # python args, a kwarg can overwrite a position arg.
 
         d = dict(zip(self.fields, args + ((0,) * 10)))  # Add enough zeros to set all fields to zero
@@ -688,8 +687,24 @@ class Geoid(object):
     def __hash__(self):
         return hash(str(self))
 
-    def __cmp__(self, other):
-        return cmp(str(self), str(other))
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def __ne__(self, other):
+        return str(self) != str(other)
+
+    def __lt__(self, other):
+        return str(self) < str(other)
+
+    def __le__(self, other):
+        return str(self) <= str(other)
+
+    def __gt__(self, other):
+        return str(self) > str(other)
+
+    def __ge__(self, other):
+        return str(self) >= str(other)
 
     @classmethod
     def parse(cls, gvid, exception=True):
@@ -707,7 +722,6 @@ class Geoid(object):
 
         if not bool(gvid):
             return None
-
 
         if not isinstance(gvid, six.string_types):
             raise TypeError("Can't parse; not a string. Got a '{}' ".format(type(gvid)))
@@ -898,7 +912,7 @@ def generate_all(sumlevel, d):
 
 
 def _generate_names():
-    """Ambry code to generate the state and county names
+    """ Code to generate the state and county names
 
     >>> python -c 'import geoid; geoid._generate_names()'
 

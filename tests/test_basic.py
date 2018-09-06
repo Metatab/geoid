@@ -60,6 +60,15 @@ class BasicTests(unittest.TestCase):
 
         self.assertEqual('61000US15001',str(acs.Sldu(15, 1)))
 
+    def test_compare(self):
+
+        from geoid.acs import Tract
+        t1 = Tract.parse('14000US06001442800')
+        t2 = Tract.parse('14000US06037205110')
+
+        print(t1 < t2)
+
+
     def test_parse(self):
         from geoid import tiger, acs, civick
         from geoid.core import parse_to_gvid
