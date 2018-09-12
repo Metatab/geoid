@@ -45,6 +45,8 @@ class AcsGeoid(Geoid):
 
         return self.parse(s[:7] + ''.join(['9'] * len(s[7:])))
 
+    def __hash__(self):
+        return hash(str(self))
 
     def __eq__(self, other):
         return str(self) == str(other)

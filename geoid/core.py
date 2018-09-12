@@ -644,7 +644,11 @@ class Geoid(object):
     @property
     def stusab(self):
         from geoid.censusnames import stusab
-        return stusab.get(self.state)
+        try:
+            return stusab.get(self.state)
+        except AttributeError:
+            # Assume this is a Us object, or some other national object
+            return 'US'
 
     @property
     def county_name(self):
