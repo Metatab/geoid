@@ -30,12 +30,16 @@ class BasicTests(unittest.TestCase):
 
     def test_tiger(self):
         from geoid import tiger
+        from geoid import acs
 
         self.assertEqual('06072000034', str(tiger.Tract(6, 72, 34)))
         self.assertEqual('06072000034', str(tiger.Tract.parse('06072000034')))
 
         self.assertEqual('440030209032037', str(tiger.Block.parse('440030209032037')))
         self.assertEqual('999999999999999', str(tiger.Block.parse('999999999999999')))
+
+        print(tiger.Tract.parse('06037980010').convert(acs.AcsGeoid))
+
 
     def test_acs(self):
         import geoid.acs as acs

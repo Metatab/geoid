@@ -645,8 +645,8 @@ class Geoid(object):
     def stusab(self):
         from geoid.censusnames import stusab
         try:
-            return stusab.get(self.state)
-        except AttributeError:
+            return stusab[int(self.state)]
+        except (AttributeError, ValueError):
             # Assume this is a Us object, or some other national object
             return 'US'
 
@@ -794,6 +794,18 @@ class Geoid(object):
             cls = root_cls.get_class(self.sl)
 
         return cls(**d)
+
+    def as_census(self):
+        from geoid.census import CensusGeoid
+        return self.convert(CensusGeoid)
+
+    def as_acs(self):
+        from geoid.acs import AcsGeoid
+        return self.convert(AcsGeoid)
+
+    def as_tiger(self):
+        from geoid.tiger import TigerGeoid
+        return self.convert(TigerGeoid)
 
     def promote(self, level=None):
         """Convert to the next higher level summary level"""
