@@ -2,10 +2,10 @@
 
 
 __author__ = "Eric Busboom"
-__copyright__ = "Copyright (c) 2018 Civic Knowledge"
+__copyright__ = "Copyright (c) 2019 Civic Knowledge"
 __credits__ = []
 __license__ = "Revised BSD"
-__version__ = '1.0.8'
+__version__ = '1.1.0'
 __maintainer__ = "Eric Busboom"
 __email__ = 'eric@civicknowledge.com'
 __status__ = "Development"
