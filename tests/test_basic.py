@@ -241,6 +241,20 @@ class BasicTests(unittest.TestCase):
             if g.is_allval:
                 print(str(g))
 
+    def test_block(self):
+
+        # 06 073 005400 4017'
+
+        b = '060730054004017'
+
+        from geoid.tiger import Block
+
+        print(Block.parse(b))
+
+
+
+
+
     def xtest_dump(self):
         from geoid import summary_levels
         from geoid import civick
