@@ -50,6 +50,7 @@ setup(
     version=meta.__version__,
     description='Classes for working with US Census geoids',
     long_description=readme,
+    long_description_content_type="text/markdown",
     packages=packages,
     package_data=package_data,
     scripts=scripts,
