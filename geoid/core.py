@@ -733,10 +733,7 @@ class Geoid(object):
         try:
             if not cls.sl:
                 # Civick and ACS include the SL, so can call from base type.
-                if six.PY3:
-                    fn = cls.decode
-                else:
-                    fn = cls.decode.__func__
+                fn = cls.decode
 
                 sl = fn(gvid[0:cls.sl_width])
             else:
@@ -744,7 +741,7 @@ class Geoid(object):
 
         except ValueError as e:
             if exception:
-                raise ValueError("Failed to parse gvid '{}': {}".format(gvid, str(e)))
+                raise ValueError("{} failed to parse gvid '{}': {}".format(cls, gvid, str(e)))
             else:
                 return cls.get_class('null')(0)
 
@@ -752,14 +749,14 @@ class Geoid(object):
             cls = cls.sl_map[sl]
         except KeyError:
             if exception:
-                raise ValueError("Failed to parse gvid '{}': Unknown summary level '{}' ".format(gvid, sl))
+                raise ValueError("{} failed to parse '{}': Unknown summary level '{}' ".format(cls, gvid, sl))
             else:
                 return cls.get_class('null')(0)
 
         m = cls.regex.match(gvid)
 
         if not m:
-            raise ValueError("Failed to match '{}' to '{}' ".format(gvid, cls.regex_str))
+            raise ValueError("{} failed to match '{}' to '{}' ".format(cls, gvid, cls.regex_str))
 
         d = m.groupdict()
 
