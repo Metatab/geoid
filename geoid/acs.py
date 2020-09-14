@@ -22,7 +22,7 @@ class AcsGeoid(Geoid):
     sl_format = '{sl:0>3d}00US'
     elem_format = '{{{}:0{}d}}'
     elem_str_format = '{{{}:0>{}}}'
-    sl_regex = '(?P<sl>.{3})..US'
+    sl_regex = '(?P<sl>.{3})(?P<gc>.{2})US'
     elem_regex = '(?P<{}>.{{{}}})'
     encode = mostly_int
     decode = mostly_int
@@ -44,6 +44,10 @@ class AcsGeoid(Geoid):
         s = str(self.allval())
 
         return self.parse(s[:7] + ''.join(['9'] * len(s[7:])))
+
+
+
+
 
     def __hash__(self):
         return hash(str(self))

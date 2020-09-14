@@ -64,6 +64,10 @@ class BasicTests(unittest.TestCase):
 
         self.assertEqual('61000US15001',str(acs.Sldu(15, 1)))
 
+        self.assertEqual('C0', acs.AcsGeoid.parse('040C0US53').component)
+
+
+
     def test_compare(self):
 
         from geoid.acs import Tract

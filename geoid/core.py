@@ -617,6 +617,11 @@ class Geoid(object):
                     raise ValueError("Failed to convert '{}' ({}) for field '{}' in {}: {}"
                                      .format(v, type(v), k, type(self), e))
 
+        if 'gc' in kwargs:
+            self.component = kwargs['gc']
+        else:
+            self.component = '00'
+
     def __str__(self):
 
         d = self.__dict__
