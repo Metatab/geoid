@@ -23,6 +23,7 @@ names = {  # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
     'tract': 140,
     'blockgroup': 150,
     'block': 101,
+    'puma': 795, # Puma 5%
     'sdelm': 950,
     'sdsec': 960,
     'sduni': 970,
@@ -60,7 +61,7 @@ names = {  # (summary level value, base 10 chars,  Base 62 chars, prefix fields)
     'state_cbsa_metdiv_county': 324,
     'state_county_cousub_place': 70,
     'necta_state_county': 353,
-    'state_puma5': 795,
+
     'csa': 330,
     'csa_state': 331,
     'csa_cbsa': 332,
