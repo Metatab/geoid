@@ -1,65 +1,21 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+"""
+    Setup file for geoid.
+    Use setup.cfg to configure your project.
 
-import os
-import sys
-import imp
+    This file was generated with PyScaffold 4.5.
+    PyScaffold helps you to put up the scaffold of your new Python project.
+    Learn more under: https://pyscaffold.org/
+"""
+from setuptools import setup
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
-# Avoiding import so we don't execute ambry.__init__.py, which has imports
-# that aren't installed until after installation.
-meta = imp.load_source('_meta', 'geoid/_meta.py')
-
-if sys.argv[-1] == 'publish':
-    os.system('python setup.py sdist upload')
-    sys.exit()
-
-
-with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
-    readme = f.read()
-
-packages = [
-    'geoid'
-]
-
-scripts=[ ]
-
-package_data = {"": ['*.html', '*.css', '*.rst']}
-
-
-
-classifiers = [
-        'Development Status :: 2 - Pre-Alpha',
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-]
-
-setup(
-    name='geoid',
-    version=meta.__version__,
-    description='Classes for working with US Census geoids',
-    long_description=readme,
-    long_description_content_type="text/markdown",
-    packages=packages,
-    package_data=package_data,
-    scripts=scripts,
-    install_requires=['six'],
-    tests_require=['nose'],
-    test_suite='nose.collector',
-    author=meta.__author__,
-    author_email='eric@civicknowledge.com',
-    url='https://github.com/CivicKnowledge/geoid',
-    license='LICENSE',
-    classifiers=classifiers,
-)
+if __name__ == "__main__":
+    try:
+        setup(use_scm_version={"version_scheme": "no-guess-dev"})
+    except:  # noqa
+        print(
+            "\n\nAn error occurred while building the project, "
+            "please ensure you have the most updated version of setuptools, "
+            "setuptools_scm and wheel with:\n"
+            "   pip install -U setuptools setuptools_scm wheel\n\n"
+        )
+        raise
