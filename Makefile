@@ -1,5 +1,10 @@
 .PHONY: default install reset check test tox readme docs publish clean
-	
+
+THIS_REV=$(shell python setup.py --version)
+NEXT_REV=$(shell python -c "import sys; import semantic_version; \
+print( semantic_version.Version('.'.join(sys.argv[1].split('.')[:3])).next_patch()  )\
+" $(THIS_REV) )
+
 MAKE := $(MAKE) --no-print-directory
 	
 test:
@@ -7,12 +12,26 @@ test:
 	
 develop: 
 	python setup.py develop 
-	
+
+# Display the version number
+showrev:
+	python -m setuptools_scm
+	@echo this=$(THIS_REV) next=$(NEXT_REV)
+
+# Create a new revision
+rev:
+	@echo this=$(THIS_REV) next=$(NEXT_REV)
+	git tag $(NEXT_REV)
+	python -m setuptools_scm
+
+
 publish: 
 	$(MAKE) clean
-	python setup.py sdist 
+	git push --tags origin
+	python setup.py sdist
 	twine upload dist/*
 	$(MAKE) clean
+
 
 check:
 	$(MAKE) clean
