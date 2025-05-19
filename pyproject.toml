@@ -1,16 +1,15 @@
 [project]
 name = "geoid"
-version = "0.1.0"
-description = "Add your description here"
+version = "1.0.5"
+description = "Classes for working with census geoids"
 readme = "README.md"
 authors = [
     { name = "Eric Busboom", email = "eric@busboom.org" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = []
 
-[project.scripts]
-geoid = "geoid:main"
+
 
 [build-system]
 requires = ["hatchling"]
