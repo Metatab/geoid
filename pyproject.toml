@@ -1,9 +1,17 @@
-[build-system]
-# AVOID CHANGING REQUIRES: IT WILL BE UPDATED BY PYSCAFFOLD!
-requires = ["setuptools>=46.1.0", "setuptools_scm[toml]>=5"]
-build-backend = "setuptools.build_meta"
+[project]
+name = "geoid"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Eric Busboom", email = "eric@busboom.org" }
+]
+requires-python = ">=3.13"
+dependencies = []
 
-[tool.setuptools_scm]
-# For smarter version schemes and other configuration options,
-# check out https://github.com/pypa/setuptools_scm
-version_scheme = "no-guess-dev"
+[project.scripts]
+geoid = "geoid:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
