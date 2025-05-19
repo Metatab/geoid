@@ -28,8 +28,7 @@ rev:
 publish: 
 	$(MAKE) clean
 	git push --tags origin
-	python setup.py sdist
-	twine upload dist/*
+	uv build
 	$(MAKE) clean
 
 
